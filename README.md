@@ -6,7 +6,7 @@ and missing values.
 
 ## Motivation
 
-Snape was primarily created for academic and educational settings.  It has used to create datasets that are unique per
+Snape was primarily created for academic and educational settings.  It has been used to create datasets that are unique per
 student, per assignment for various homework assignments.  It has also been used to create class wide assessments in
 conjunction with 'Kaggle In the Classroom.'
 
