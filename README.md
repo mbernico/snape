@@ -87,6 +87,8 @@ todo
 ## Usage Documentation
 [Dataset Creation](doc/make_dataset.md)
 [Dataset Scoring](doc/score_dataset.md)
+[Classification JSON](doc/config_classification.md)
+[Regression JSON](doc/config_regression.md)
 
 
 ## Why Snape?
