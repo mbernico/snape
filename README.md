@@ -85,7 +85,12 @@ todo
 
 
 ## Usage Documentation
-[Dataset Creation]()
-[Dataset Scoring]()
+[Dataset Creation](doc/make_dataset.md)
+[Dataset Scoring](doc/score_dataset.md)
+
+
+## Why Snape?
+Snape is primarily used for creating complex datasets that *challenge* students and teach defense against the dark
+arts of machine learning.  :)
 
 
