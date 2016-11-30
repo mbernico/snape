@@ -1,0 +1,18 @@
+{
+  "type":"classification",
+  "n_classes":2,
+  "n_samples":10000,
+  "n_features":100,
+  "out_path":"./",
+  "output":"my_dataset",
+  "n_informative":30,
+  "n_duplicate":3,
+  "n_redundant":5,
+  "n_clusters":4,
+  "weights":[0.8,0.2],
+  "pct_missing":0.01,
+  "insert_dollar":"Yes",
+  "insert_percent":"Yes",
+  "n_categorical":3,
+  "label_list":[["america","asia", "euorpe"], ["monday", "tuesday", "wednesday", "thurday", "friday"], ["January","Feb","Mar","Apr","May","Jun","July", "Aug", "sept.","Oct","Nov","Dev"]]
+}

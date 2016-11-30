@@ -1,0 +1,17 @@
+{
+  "type":"regression",
+  "n_samples":10000,
+  "n_features":100,
+  "out_path":"./",
+  "output":"my_dataset",
+  "n_informative":30,
+  "n_targets":1,
+  "effective_rank":1,
+  "tail_strength":0.5,
+  "noise":0.0,
+  "pct_missing":0.01,
+  "insert_dollar":"Yes",
+  "insert_percent":"Yes",
+  "n_categorical":3,
+  "label_list":[["america","asia", "europe"], ["monday", "tuesday", "wednesday", "thursday", "friday"], ["January","Feb","Mar","Apr","May","Jun","July", "Aug", "sept.","Oct","Nov","Dev"]]
+}
