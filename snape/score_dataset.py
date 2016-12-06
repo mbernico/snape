@@ -7,15 +7,15 @@
 #
 ########################################################################
 import argparse
+from math import sqrt
+
 import pandas as pd
 from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
-from math import sqrt
 
 
 def parse_args():
@@ -122,7 +122,7 @@ def score_regression(y, y_hat, report=True):
     return(mae, report_string)
 
 
-def score_dataset(y=None, y_hat=None):
+def score_dataset(y_file=None, y_hat_file=None):
     """
     1 Reads in key file and prediction file (students predictions)
     2 guesses problem type
@@ -131,24 +131,25 @@ def score_dataset(y=None, y_hat=None):
     :return:
     """
 
-    command_line = False
-    if y is None and y_hat is None:
+    report_output = True
+    if y_file is None and y_hat_file is None:
         # called from the command line so parse configuration
         args = parse_args()
         y, y_hat = read_files(args['key'], args['pred'])
-        command_line = True
-
+    else:
+        y, y_hat = read_files(y_file, y_hat_file)
+        report_output = False
 
     problem_type = guess_problem_type(y)
     print("Problem Type Detection: " + problem_type )
     if problem_type == 'binary':
-        results = score_binary_classification(y, y_hat)
+        results = score_binary_classification(y, y_hat, report=report_output)
     elif problem_type == 'multiclass':
-        results = score_multiclass_classification(y, y_hat)
+        results = score_multiclass_classification(y, y_hat, report=report_output)
     else:
         results = score_regression(y, y_hat)
 
-    if command_line:
+    if not report_output:
         return results
 
 
