@@ -184,6 +184,7 @@ def create_regression_dataset(n_samples, n_features, n_informative, effective_ra
     :param n_samples: number of observations
     :param n_features: number of features
     :param n_informative: number of informative features
+    :param n_targets: The number of regression targets, i.e., the dimension of the y output vector associated with a sample. By default, the output is a scalar.
     :param effective_rank: approximate number of singular vectors required to explain data
     :param tail_strength: relative importance of the fat noisy tail of the singular values profile
     :param noise: standard deviation of the gaussian noise applied to the output
