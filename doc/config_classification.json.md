@@ -14,7 +14,7 @@
 
 		The number of features
 
-**out_path**: , (default=“./“)
+**out_path**: string, (default=“./“)
 
 		The output system path 
 
