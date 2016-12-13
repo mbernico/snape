@@ -113,11 +113,10 @@ print(results[1])
 ````
 
 
-## Usage Documentation
-1.  [Dataset Creation](doc/make_dataset.md)
-2.  [Dataset Scoring](doc/score_dataset.md)
-3.  [Classification JSON](doc/config_classification.json.md)
-4.  [Regression JSON](doc/config_regression.json.md)
+## Dataset Generation Config
+
+1.  [Classification JSON](doc/config_classification.json.md)
+2.  [Regression JSON](doc/config_regression.json.md)
 
 
 ## Why Snape?
