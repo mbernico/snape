@@ -66,13 +66,15 @@ def guess_problem_type(key):
 def score_binary_classification(y, y_hat, report=True):
     """
     Create binary classification output
-    :param y:
-    :param y_hat:
+    :param y: true value
+    :param y_hat: class 1 probabilities
     :param report:
     :return:
     """
+    y_hat_class = [1 if x >= 0.5 else 0 for x in y_hat] # convert probability to class for classification report
+
     report_string = "---Binary Classification Score--- \n"
-    report_string += classification_report(y, y_hat)
+    report_string += classification_report(y, y_hat_class)
     score = roc_auc_score(y, y_hat)
     report_string += "\nAUC = " + str(score)
 
@@ -111,7 +113,7 @@ def score_regression(y, y_hat, report=True):
     rmse = sqrt(mean_squared_error(y, y_hat))
     mae = mean_absolute_error(y, y_hat)
 
-    report_string = "---Regression Classification Score--- \n"
+    report_string = "---Regression Score--- \n"
     report_string += "R2 = " + str(r2) + "\n"
     report_string += "RMSE = " + str(rmse) + "\n"
     report_string += "MAE = " + str(mae) + "\n"
