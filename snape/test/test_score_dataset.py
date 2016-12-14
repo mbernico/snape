@@ -47,11 +47,5 @@ class TestScoreDataset(unittest.TestCase):
         self.assertAlmostEquals(round(score_regression(y,y_hat, report=False)[0],2), 0.48)
         self.assertTrue("---Regression Score---" in score_regression(y, y_hat, report=False)[1])
 
-
-
-
-
-
-
 if __name__ == '__main__':
     unittest.main()
