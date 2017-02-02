@@ -13,6 +13,7 @@ setup(name='Snape',
                       'numpy',
                       'argparse',
                       'json',
-                      'random'],
+                      'random',
+                      're'],
     zip_safe=False)
 

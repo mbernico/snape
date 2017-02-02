@@ -46,6 +46,8 @@ The dataset will consist of three files:
 *  my_dataset_test.csv    (20% of the artificial dataset with only the dependent variables present)
 *  my_dataset_testkey.csv (the same 20% as _test, including the dependent variables)
 
+Note that if a star schema is generated, additional csv files will be generated. There will be one extra csv file per dimension, but only the main 'fact table' dataset will be split into test and train files. 
+
 The train and test files can be given to a student.  The student can respond with a file of predictions, which can be
 scored against the testkey as follows:
 
@@ -93,6 +95,7 @@ conf = {
     "insert_dollar": "Yes",
     "insert_percent": "Yes",
     "n_categorical": 0,
+    "star_schema": "No",
     "label_list": []
 }
 

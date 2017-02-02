@@ -18,6 +18,7 @@ conf = {
     "insert_dollar": "Yes",
     "insert_percent": "Yes",
     "n_categorical": 0,
+    "star_schema": "No",
     "label_list": []
 }
 
