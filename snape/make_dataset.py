@@ -10,12 +10,16 @@
 
 from sklearn.datasets import make_classification
 from sklearn.datasets import make_regression
-from sklearn.cross_validation import train_test_split
 import pandas as pd
 import numpy as np
 import argparse
 import json
 import random
+
+try:
+    from sklearn.model_selection import train_test_split
+except ImportError:
+    from sklearn.cross_validation import train_test_split
 
 
 def parse_args():
