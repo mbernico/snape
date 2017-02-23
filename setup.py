@@ -1,6 +1,6 @@
 from setuptools import setup
 
-setup(name='Snape',
+setup(name='snape',
     version='0.1',
     description='Snape Realistic Synthetic Dataset Tool',
     url='https://github.com/mbernico/snape',
@@ -10,9 +10,6 @@ setup(name='Snape',
     packages=['snape'],
     install_requires=['sklearn',
                       'pandas',
-                      'numpy',
-                      'argparse',
-                      'json',
-                      'random'],
+                      'numpy'],
     zip_safe=False)
 
