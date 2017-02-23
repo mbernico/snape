@@ -1,3 +1,6 @@
+[![Build status](https://travis-ci.org/mbernico/snape.svg?branch=master)](https://travis-ci.org/mbernico/snape)
+[![Coverage Status](https://coveralls.io/repos/github/mbernico/snape/badge.svg?branch=master)](https://coveralls.io/github/mbernico/snape?branch=master)
+
 # Snape
 
 Snape is a convenient artificial dataset generator that wraps sklearn's make_classification and make_regression
