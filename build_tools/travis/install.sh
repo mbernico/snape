@@ -18,10 +18,6 @@ if [[ "$DISTRIB" == "conda" ]]; then
     echo
     if [[ ! -f miniconda.sh ]]
         then
-        if [[ "$PYTHON_VERSION" == "2.7" ]]; then
-            wget http://repo.continuum.io/miniconda/Miniconda-3.6.0-Linux-x86_64.sh \
-            -O miniconda.sh
-        fi
         if [[ "$PYTHON_VERSION" == "3.5" ]]; then
             wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh \
             -O miniconda.sh
@@ -43,10 +39,6 @@ if [[ "$DISTRIB" == "conda" ]]; then
     conda create -n testenv --yes python=$PYTHON_VERSION numpy scipy coverage
 
     source activate testenv
-
-    if [[ "$PYTHON_VERSION" == "2.7" ]]; then
-      conda install --yes -c dan_blanchard python-coveralls nose-cov;
-    fi
 
     pip install scikit-learn==$SCIKIT_LEARN_VERSION
     pip install pandas

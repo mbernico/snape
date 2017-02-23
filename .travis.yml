@@ -10,7 +10,7 @@ addons:
 env:
   global:
     # Directory where tests are run from
-    - TEST_DIR=/tmp/smrt
+    - TEST_DIR=/tmp/snape
     - OMP_NUM_THREADS=4
     - OPENBLAS_NUM_THREADS=4
   matrix:
