@@ -59,7 +59,10 @@ class TestMakeDataset(unittest.TestCase):
         key_df = fact_df[[key_cols]]
         na_df = key_df.dropna()
         self.assertEqual(len(na_df), 0, msg="Nulls exist in the dimension key columns in the star schema.")
-        
+        # Assert that an index named 'primary_key' was added.
+        self.assertTrue(key_cols.contains('primary_key'), msg="Index named primary key was not added to the fact table")
+        self.assertEqual(len(fact_df.primary_key.value_counts(),len(fact_df)), msg="Primary key isn't unique.")
+
 
 if __name__ == '__main__':
     unittest.main()
