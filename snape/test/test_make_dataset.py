@@ -3,6 +3,7 @@ import pandas as pd
 
 from snape.make_dataset import *
 import glob
+import os
 
 
 class TestMakeDataset(unittest.TestCase):
@@ -45,23 +46,26 @@ class TestMakeDataset(unittest.TestCase):
         df = create_categorical_features(df, 2, [['a', 'b'], ['red', 'blue']])
         df = insert_special_char('$', df)
         df = insert_special_char('%', df)
-        df = insert_missing_values(df, config['pct_missing'])
+        df = insert_missing_values(df, .8)
         fact_df = make_star_schema(df)
         # Assert file generation
         file_list = glob.glob('./*_dim.csv')
-        diff_list = file_list - ['a_dim.csv','b_dim.csv']
-        self.assertEqual(len(diff_list), len(file_list) - 2)
+        diff_list = list(filter(lambda x: x.endswith('_dim.csv'), file_list))
+        self.assertEqual(len(diff_list), 2)
+        # Delete the tester files
+        for file_path in file_list:
+            os.remove(file_path)
         # Assert key column creation
         columns = fact_df.columns
-        key_cols = filter(lambda x: x.endswith('_key'), columns)
-        self.assertListEqual(key_cols, ['a_key','b_key'])
+        key_cols = list(filter(lambda x: x.endswith('_key'), columns))
+        self.assertEqual(len(key_cols), 3)
         # Assert key columns don't contain any nulls
-        key_df = fact_df[[key_cols]]
+        key_df = fact_df[key_cols]
         na_df = key_df.dropna()
-        self.assertEqual(len(na_df), 0, msg="Nulls exist in the dimension key columns in the star schema.")
+        self.assertEqual(len(na_df), len(key_df), msg="Nulls exist in the dimension key columns in the star schema.")
         # Assert that an index named 'primary_key' was added.
-        self.assertTrue(key_cols.contains('primary_key'), msg="Index named primary key was not added to the fact table")
-        self.assertEqual(len(fact_df.primary_key.value_counts(),len(fact_df)), msg="Primary key isn't unique.")
+        self.assertTrue('primary_key' in fact_df.columns, msg="Index named pk was not added to the fact table")
+        self.assertEqual(len(fact_df.primary_key.value_counts()),len(fact_df), msg="Primary key isn't unique.")
 
 
 if __name__ == '__main__':

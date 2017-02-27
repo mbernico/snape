@@ -224,23 +224,8 @@ def make_star_schema(df, out_path="./"):
         :param df: dataframe
         :return: list of categorical columns
         """
-        # Make a dataframe out of the data types of source dataframe
-        dt = pd.DataFrame(df.dtypes)
-
-        # Reset the index of the dataframe so that column names are a column themselves instead of being an index
-        dt.reset_index(inplace=True)
-
-        # Rename the columns of the datatype dataframe
-        dt.columns = ['index','types']
-
-        # Make an empty list to store categorical columns in
-        categorical_columns = []
-
-        for x in range(0, len(dt)):
-            if (dt['types'][x] == 'object'):
-                categorical_columns.append(dt['index'][x])
-
-        return categorical_columns
+        just_categoricals = df.select_dtypes(include=['category','object'])
+        return just_categoricals.columns
     
     
     def find_dollars(text):
@@ -292,7 +277,7 @@ def make_star_schema(df, out_path="./"):
     
     # Get the categorical columns
     cols = get_categorical_columns(df)
-    assert cols > 0, "No categorical variables exist in this dataset; star schema cannot be developed."
+    assert len(cols) > 0, "No categorical variables exist in this dataset; star schema cannot be developed."
     
     # Iterate through the categorical columns
     for cat_column in cols:
@@ -309,13 +294,15 @@ def make_star_schema(df, out_path="./"):
             vals.reset_index(inplace=True) # Puts the index numbers in as integers
             
             # Name the column with the same name as the column 'value_count'
-            vals.rename(index=str, columns={'level_0':'primary_key', 'index':'item',cat_column:'value_count'}, inplace=True)
+            vals.rename(index=str, columns={'level_0':'primary_key', 'index':'item',
+                                            cat_column:'value_count'}, inplace=True)
             
             # Make a df out of just the value and the mapping
             val_df = vals[['primary_key','item']]
             
             # Make a dimension df by appending a NaN placeholder
-            val_df = val_df.append({'primary_key':-1, 'item':'Not specified'}, ignore_index=True)
+            val_df.item.cat.add_categories('Not specified', inplace=True)
+            val_df = val_df.append({'primary_key': -1, 'item': 'Not specified'}, ignore_index=True)
             
             # Write the new dimension table out to CSV
             dim_file_name = cat_column + '_dim.csv'
@@ -327,7 +314,8 @@ def make_star_schema(df, out_path="./"):
             # Convert to dict for mapping
             mapper = val_df.to_dict().get('primary_key')
             
-            # Fill the NaNs in the dataframe's categorical column to -1
+            # Fill the NaNs in the dataframe's categorical column to 'Not Specified'
+            df[cat_column].cat.add_categories('Not specified', inplace=True)
             df[cat_column].fillna('Not specified', inplace=True)
             
             # Insert new column into the dataframe
@@ -337,9 +325,15 @@ def make_star_schema(df, out_path="./"):
             # Drop cat column from the dataframe
             df.drop(cat_column, axis=1, inplace=True)
             
-    
+    # Now, reset the dataframe's index and rename the index column as 'primary_key'
+    df.reset_index(inplace=True)
+    df_cols = df.columns
+    df_cols = df_cols.delete(0)
+    df_cols = df_cols.insert(0, 'primary_key')
+    df.columns=df_cols
+
     # Return the main dataframe as a 'fact' table, which will then be split into test/train splits, since dimension tables are immune to this
-    return df    
+    return df.copy()
 
 
 def write_dataset(df, file_name, out_path="./"):
