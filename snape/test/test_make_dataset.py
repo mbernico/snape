@@ -47,12 +47,19 @@ class TestMakeDataset(unittest.TestCase):
         df = insert_special_char('%', df)
         df = insert_missing_values(df, config['pct_missing'])
         fact_df = make_star_schema(df)
+        # Assert file generation
         file_list = glob.glob('./*_dim.csv')
         diff_list = file_list - ['a_dim.csv','b_dim.csv']
         self.assertEqual(len(diff_list), len(file_list) - 2)
+        # Assert key column creation
         columns = fact_df.columns
         key_cols = filter(lambda x: x.endswith('_key'), columns)
         self.assertListEqual(key_cols, ['a_key','b_key'])
+        # Assert key columns don't contain any nulls
+        key_df = fact_df[[key_cols]]
+        na_df = key_df.dropna()
+        self.assertEqual(len(na_df), 0, msg="Nulls exist in the dimension key columns in the star schema.")
+        
 
 if __name__ == '__main__':
     unittest.main()
