@@ -50,6 +50,9 @@ class TestMakeDataset(unittest.TestCase):
         file_list = glob.glob('./*_dim.csv')
         diff_list = file_list - ['a_dim.csv','b_dim.csv']
         self.assertEqual(len(diff_list), len(file_list) - 2)
+        columns = fact_df.columns
+        key_cols = filter(lambda x: x.endswith('_key'), columns)
+        self.assertListEqual(key_cols, ['a_key','b_key'])
 
 if __name__ == '__main__':
     unittest.main()
