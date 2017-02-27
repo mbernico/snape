@@ -1,3 +1,7 @@
 .DS_*
+*.pyc
 __pycache__
 .idea
+*.egg-info
+build/
+dist/
