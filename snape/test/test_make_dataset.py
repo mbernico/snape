@@ -2,13 +2,13 @@ import unittest
 import pandas as pd
 
 from snape.make_dataset import *
+import glob
 
 
 class TestMakeDataset(unittest.TestCase):
     def test_create_classification_dataset(self):
         df = create_classification_dataset(n_samples=100, n_features=10, n_informative=3, n_redundant=0,
                                            n_repeated=0, n_clusters_per_class=2, weights=[0.5, 0.5], n_classes=2)
-
         self.assertEqual(df.shape[0], 100, "Sample Size Doesn't Match")
         self.assertEqual(df.shape[1], 11, "Feature Count")
         self.assertEqual(df['y'].value_counts().shape[0], 2, "Expected Shape of Classes Do Not Match")
@@ -39,6 +39,17 @@ class TestMakeDataset(unittest.TestCase):
         df_result = insert_missing_values(df, 0)
         self.assertFalse(df_result.isnull().any().any())
 
+    def test_star_schema(self):
+        df = create_classification_dataset(n_samples=100, n_features=10, n_informative=3, n_redundant=0,
+                                           n_repeated=0, n_clusters_per_class=2, weights=[0.5, 0.5], n_classes=2)
+        df = create_categorical_features(df, 2, [['a', 'b'], ['red', 'blue']])
+        df = insert_special_char('$', df)
+        df = insert_special_char('%', df)
+        df = insert_missing_values(df, config['pct_missing'])
+        fact_df = make_star_schema(df)
+        file_list = glob.glob('./*_dim.csv')
+        diff_list = file_list - ['a_dim.csv','b_dim.csv']
+        self.assertEqual(len(diff_list), len(file_list) - 2)
 
 if __name__ == '__main__':
     unittest.main()
