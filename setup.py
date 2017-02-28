@@ -12,4 +12,3 @@ setup(name='snape',
                       'pandas',
                       'numpy'],
     zip_safe=False)
-

@@ -15,6 +15,7 @@ import numpy as np
 import argparse
 import json
 import random
+import re
 
 try:
     from sklearn.model_selection import train_test_split
@@ -207,6 +208,138 @@ def create_regression_dataset(n_samples, n_features, n_informative, effective_ra
     return df
 
 
+def make_star_schema(df, out_path="./"):
+    """
+    
+    Converts dataset to star-schema fact and dimension tables. Dimension tables are written out to CSV files,
+    and the dataframe passed to the function is converted into a 'fact' table and returned as a dataframe (this
+    file is NOT written out at this point because the fact table would be subject to test/train split functions,
+    and dimension tables would not be). 
+
+    :param df: Source dataframe
+    :param out_path: path to write the dimension files to
+    :return: dataframe with dimension table
+    """
+    # Internal classes (when database version is available, some of these may move outside of the scope of this function).
+    def get_categorical_columns(df):
+        """
+        Returns a list of categorical variables from a supplied dataframe.
+        
+        :param df: dataframe
+        :return: list of categorical columns
+        """
+        just_categoricals = df.select_dtypes(include=['category','object'])
+        return just_categoricals.columns
+    
+    
+    def find_dollars(text):
+        """
+        Identifies if a string value specifies a dollar amount. 
+        
+        :param text: Text string to be evaluated for whether or not it signifies a dollar amount.
+        :return: Integer value: 1 for true, 0 for false. This is later used in a sum.
+        """
+        dollar_match = re.match(r'^\$-?\d+\.?\d+', str(text))
+        if dollar_match:
+            return 1
+        else:
+            return 0
+        
+        
+    def find_percentages(text):
+        """
+        Identifies if a string value specifies a percentage. 
+        
+        :param text: Text string to be evaluated for whether or not it signifies a percentage.
+        :return: Integer value: 1 for true, 0 for false. This is later used in a sum.
+        """
+        percent_search = re.search(r'^-?\d+\.?\d+[%]$', str(text))
+        if percent_search:
+            return 1
+        else:
+            return 0
+    
+    
+    def is_special_char(list_object):
+        """
+        Identifies whether or not a list object consists entirely of special characters added to the dataset. 
+        
+        :param list_object: List-like object; evaluated for whether or not all values within it are special character fields.
+        :return: Boolean, True or False
+        """
+        if list_object.dtype != 'O':
+            return False
+        else:
+            percent_sum = sum(list_object.apply(find_percentages))
+            dollars_sum = sum(list_object.apply(find_dollars))
+
+            if (percent_sum/list_object.count() == 1) or (dollars_sum/list_object.count() == 1):
+                return True
+            else:
+                return False
+    
+    
+    # Get the categorical columns
+    cols = get_categorical_columns(df)
+    assert len(cols) > 0, "No categorical variables exist in this dataset; star schema cannot be developed."
+    
+    # Iterate through the categorical columns
+    for cat_column in cols:
+        
+        # Determine if the list includes requested entropy or not (NOTE: Decided not to make dimension 
+        # tables before this command so dimension keys CAN'T be selected for entropy)
+        if is_special_char(df[cat_column]) != True:
+            
+            # Turn the value counts into a dataframe
+            vals = pd.DataFrame(df[cat_column].value_counts())
+            
+            # Reset the index to add index as the key
+            vals.reset_index(inplace=True) # Puts the field names into the dataframe
+            vals.reset_index(inplace=True) # Puts the index numbers in as integers
+            
+            # Name the column with the same name as the column 'value_count'
+            vals.rename(index=str, columns={'level_0':'primary_key', 'index':'item',
+                                            cat_column:'value_count'}, inplace=True)
+            
+            # Make a df out of just the value and the mapping
+            val_df = vals[['primary_key','item']]
+            
+            # Make a dimension df by appending a NaN placeholder
+            val_df.item.cat.add_categories('Not specified', inplace=True)
+            val_df = val_df.append({'primary_key': -1, 'item': 'Not specified'}, ignore_index=True)
+            
+            # Write the new dimension table out to CSV
+            dim_file_name = cat_column + '_dim.csv'
+            val_df.to_csv(out_path + dim_file_name, index=False)
+            
+            # Set the index up for mapping
+            val_df.set_index('item', inplace=True)
+            
+            # Convert to dict for mapping
+            mapper = val_df.to_dict().get('primary_key')
+            
+            # Fill the NaNs in the dataframe's categorical column to 'Not Specified'
+            df[cat_column].cat.add_categories('Not specified', inplace=True)
+            df[cat_column].fillna('Not specified', inplace=True)
+            
+            # Insert new column into the dataframe
+            df.insert(df.shape[1], cat_column + '_key', df[cat_column].map(mapper))
+            #df[cat_column + '_key'] = df[cat_column + '_key'].apply(int)
+            
+            # Drop cat column from the dataframe
+            df.drop(cat_column, axis=1, inplace=True)
+            
+    # Now, reset the dataframe's index and rename the index column as 'primary_key'
+    df.reset_index(inplace=True)
+    df_cols = df.columns
+    df_cols = df_cols.delete(0)
+    df_cols = df_cols.insert(0, 'primary_key')
+    df.columns=df_cols
+
+    # Return the main dataframe as a 'fact' table, which will then be split into test/train splits, since dimension tables are immune to this
+    return df.copy()
+
+
 def write_dataset(df, file_name, out_path="./"):
     """
     Writes generated dataset to file
@@ -264,10 +397,19 @@ def make_dataset(config=None):
         df = insert_special_char('$', df)
     if config['insert_percent'] == "Yes":
         df = insert_special_char('%', df)
+    
     # insert missing values
     df = insert_missing_values(df, config['pct_missing'])
 
     print('Done Creating Dataset')
+    
+    # Convert dataset to star schema if requested
+    if config['star_schema'] == "Yes":
+        # Check the number of categorical variables
+        if config['n_categorical'] > 0:
+            df = make_star_schema(df, config['out_path'])
+        else:
+            print("No categorical variables added. Dataset cannot be transformed into a star schema. Dataset will be generated as a single-table dataset...")
 
     print("Writing Train/Test Datasets")
     write_dataset(df, config['output'], config['out_path'])

@@ -1,6 +1,6 @@
 {
   "type":"classification",
-  "n_classes":5,
+  "n_classes":2,
   "n_samples":10000,
   "n_features":100,
   "out_path":"./",
@@ -9,11 +9,11 @@
   "n_duplicate":3,
   "n_redundant":5,
   "n_clusters":4,
-  "weights":[0.2,0.2,0.2,0.2,0.2],
+  "weights":[0.8,0.2],
   "pct_missing":0.01,
   "insert_dollar":"Yes",
   "insert_percent":"Yes",
   "n_categorical":3,
-  "star_schema":"No",
+  "star_schema":"Yes",
   "label_list":[["america","asia", "euorpe"], ["monday", "tuesday", "wednesday", "thurday", "friday"], ["January","Feb","Mar","Apr","May","Jun","July", "Aug", "sept.","Oct","Nov","Dev"]]
 }
