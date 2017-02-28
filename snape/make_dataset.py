@@ -26,12 +26,8 @@ except ImportError:
 def parse_args():
     """
     Returns arguments passed at the command line as a dict
-
-    :return: configuration dictionary
-
     """
     parser = argparse.ArgumentParser(description='Generates a machine Learning Dataset.')
-    # parser.add_argument('-f', '--foo', help='Description for foo argument', required=True)
     parser.add_argument('-c', help="Config File Location", required=True,
                         dest='config')
     args = vars(parser.parse_args())
@@ -40,11 +36,7 @@ def parse_args():
 
 def load_config(config_name):
     """
-    loads a json config file and returns a dictionary args
-
-    :param config_name: name of json configuration file
-    :return: config dict
-
+    loads a json config file and returns a config dictionary
     """
     with open(config_name) as config_file:
         config = json.load(config_file)
@@ -54,9 +46,6 @@ def load_config(config_name):
 def rename_columns(df):
     """
     Rename the columns of a dataframe to have X in front of them
-    :param df: dataframe we want to modify
-    :return: altered dataframe
-
     """
     df = df.copy()
     col_names = ["x" + str(i) for i in df.columns]
@@ -66,22 +55,17 @@ def rename_columns(df):
 
 def insert_missing_values(df, percent_rows):
     """
-    Inserts missing values into a dataframe.
+    Inserts missing values into a data frame.
 
-    :param df: dataframe we're operating on
+    :param df: data frame we're operating on
     :param percent_rows: the percentage of rows that should have a missing value.
     :return: a df with missing values
-
     """
 
     def insert_random_null(x):
         """
         Chose a random column in a df row to null
-        :param x: dataframe row
-        :return: row with null
-
         """
-
         col = random.randint(0, len(x) - 2)  # -2 because last col will always be y
         x[col] = np.nan
         return x
@@ -103,7 +87,6 @@ def insert_special_char(character, df):
     :param character: either $ or %
     :param df: the dataframe we're operating on
     :return: A dataframe with a single column chosen at random converted to a % or $ format
-
     """
 
     df = df.copy()
@@ -111,15 +94,13 @@ def insert_special_char(character, df):
     chosen_col = random.choice([col for col in df.select_dtypes(include=['number']).columns if col != 'y'])
 
     if character is "$":
-        # rescale the column to 0 mean, 1 std dev, then multiply by 1000
-        # lastly, stick a $ in front of it
+        # rescale the column to 0 mean, 1 std dev, then multiply by 1000, finally add a $
         df[chosen_col] = ((df[chosen_col] - df[chosen_col].mean()) / df[chosen_col].std() * 1000).round(decimals=2)\
             .map(lambda x: "$" + str(x))
         return df
 
     if character is "%":
-        # rescale the column to 0 mean, 1 std dev, then divide by 100
-        # lastly, stick a % after it
+        # rescale the column to 0 mean, 1 std dev, then divide by 100, finally add a $
         df[chosen_col] = (((df[chosen_col] - df[chosen_col].mean()) / df[chosen_col].std()) / 100).round(decimals=2)\
                                .map(lambda x: str(x) + "%")
         return df
@@ -166,7 +147,6 @@ def create_classification_dataset(n_samples, n_features, n_informative, n_redund
     :param n_clusters_per_class:  gaussian clusters per class
     :param weights: list of class balances, e.g. [.5, .5]
     :return: the requested dataframe
-
     """
     X, y = make_classification(n_samples=n_samples, n_features=n_features, n_informative=n_informative,
                                n_redundant=n_redundant, n_repeated=n_repeated,
@@ -210,7 +190,6 @@ def create_regression_dataset(n_samples, n_features, n_informative, effective_ra
 
 def make_star_schema(df, out_path="./"):
     """
-    
     Converts dataset to star-schema fact and dimension tables. Dimension tables are written out to CSV files,
     and the dataframe passed to the function is converted into a 'fact' table and returned as a dataframe (this
     file is NOT written out at this point because the fact table would be subject to test/train split functions,
@@ -220,25 +199,12 @@ def make_star_schema(df, out_path="./"):
     :param out_path: path to write the dimension files to
     :return: dataframe with dimension table
     """
-    # Internal classes (when database version is available, some of these may move outside of the scope of this function).
     def get_categorical_columns(df):
-        """
-        Returns a list of categorical variables from a supplied dataframe.
-        
-        :param df: dataframe
-        :return: list of categorical columns
-        """
         just_categoricals = df.select_dtypes(include=['category','object'])
         return just_categoricals.columns
     
     
     def find_dollars(text):
-        """
-        Identifies if a string value specifies a dollar amount. 
-        
-        :param text: Text string to be evaluated for whether or not it signifies a dollar amount.
-        :return: Integer value: 1 for true, 0 for false. This is later used in a sum.
-        """
         dollar_match = re.match(r'^\$-?\d+\.?\d+', str(text))
         if dollar_match:
             return 1
@@ -247,12 +213,6 @@ def make_star_schema(df, out_path="./"):
         
         
     def find_percentages(text):
-        """
-        Identifies if a string value specifies a percentage. 
-        
-        :param text: Text string to be evaluated for whether or not it signifies a percentage.
-        :return: Integer value: 1 for true, 0 for false. This is later used in a sum.
-        """
         percent_search = re.search(r'^-?\d+\.?\d+[%]$', str(text))
         if percent_search:
             return 1
@@ -261,12 +221,6 @@ def make_star_schema(df, out_path="./"):
     
     
     def is_special_char(list_object):
-        """
-        Identifies whether or not a list object consists entirely of special characters added to the dataset. 
-        
-        :param list_object: List-like object; evaluated for whether or not all values within it are special character fields.
-        :return: Boolean, True or False
-        """
         if list_object.dtype != 'O':
             return False
         else:
@@ -277,8 +231,7 @@ def make_star_schema(df, out_path="./"):
                 return True
             else:
                 return False
-    
-    
+
     # Get the categorical columns
     cols = get_categorical_columns(df)
     assert len(cols) > 0, "No categorical variables exist in this dataset; star schema cannot be developed."
@@ -288,21 +241,21 @@ def make_star_schema(df, out_path="./"):
         
         # Determine if the list includes requested entropy or not (NOTE: Decided not to make dimension 
         # tables before this command so dimension keys CAN'T be selected for entropy)
-        if is_special_char(df[cat_column]) != True:
+        if is_special_char(df[cat_column]) is not True:
             
             # Turn the value counts into a dataframe
             vals = pd.DataFrame(df[cat_column].value_counts())
             
             # Reset the index to add index as the key
-            vals.reset_index(inplace=True) # Puts the field names into the dataframe
-            vals.reset_index(inplace=True) # Puts the index numbers in as integers
+            vals.reset_index(inplace=True)  # Puts the field names into the dataframe
+            vals.reset_index(inplace=True)  # Puts the index numbers in as integers
             
             # Name the column with the same name as the column 'value_count'
-            vals.rename(index=str, columns={'level_0':'primary_key', 'index':'item',
-                                            cat_column:'value_count'}, inplace=True)
+            vals.rename(index=str, columns={'level_0': 'primary_key', 'index':'item',
+                                            cat_column: 'value_count'}, inplace=True)
             
             # Make a df out of just the value and the mapping
-            val_df = vals[['primary_key','item']]
+            val_df = vals[['primary_key', 'item']]
             
             # Make a dimension df by appending a NaN placeholder
             val_df.item.cat.add_categories('Not specified', inplace=True)
@@ -324,8 +277,7 @@ def make_star_schema(df, out_path="./"):
             
             # Insert new column into the dataframe
             df.insert(df.shape[1], cat_column + '_key', df[cat_column].map(mapper))
-            #df[cat_column + '_key'] = df[cat_column + '_key'].apply(int)
-            
+
             # Drop cat column from the dataframe
             df.drop(cat_column, axis=1, inplace=True)
             
@@ -336,7 +288,8 @@ def make_star_schema(df, out_path="./"):
     df_cols = df_cols.insert(0, 'primary_key')
     df.columns=df_cols
 
-    # Return the main dataframe as a 'fact' table, which will then be split into test/train splits, since dimension tables are immune to this
+    # Return the main dataframe as a 'fact' table, which will then be split into test/train splits
+    # dimension tables are immune to this
     return df.copy()
 
 
