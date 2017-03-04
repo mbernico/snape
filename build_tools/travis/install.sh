@@ -18,18 +18,16 @@ if [[ "$DISTRIB" == "conda" ]]; then
     echo
     if [[ ! -f miniconda.sh ]]
         then
+        if [[ "$PYTHON_VERSION" == "2.7" ]]; then
+            wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+        fi
         if [[ "$PYTHON_VERSION" == "3.5" ]]; then
-            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-            -O miniconda.sh
+            wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
         fi
     fi
-    chmod +x miniconda.sh && ./miniconda.sh -b
+    chmod +x miniconda.sh && bash miniconda.sh -b -p $HOME/miniconda
+    export PATH="$HOME/miniconda/bin:$PATH"
     cd ..
-
-    # Set conda command relative to miniconda version.
-    if [[ "$PYTHON_VERSION" == "3.5" ]]; then
-        export PATH=/home/travis/miniconda3/bin:$PATH
-    fi
 
     conda update --yes conda
     popd
@@ -39,6 +37,9 @@ if [[ "$DISTRIB" == "conda" ]]; then
     conda create -n testenv --yes python=$PYTHON_VERSION numpy scipy coverage
 
     source activate testenv
+    if [[ "$PYTHON_VERSION" == "2.7" ]]; then
+      conda install --yes -c dan_blanchard python-coveralls nose-cov;
+    fi
 
     pip install scikit-learn==$SCIKIT_LEARN_VERSION
     pip install pandas

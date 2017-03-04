@@ -1,5 +1,6 @@
 import unittest
 import pandas as pd
+import numpy as np
 
 from snape.make_dataset import *
 import glob

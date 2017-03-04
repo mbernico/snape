@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 
 ########################################################################
 # Scores a Machine Learning Problem Dataset
@@ -6,6 +5,8 @@
 #
 #
 ########################################################################
+
+from __future__ import print_function, absolute_import, division
 import argparse
 from math import sqrt
 

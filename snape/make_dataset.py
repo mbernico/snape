@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 
 ########################################################################
 # Creates a Machine Learning Problem Dataset
@@ -8,8 +7,8 @@
 #
 ########################################################################
 
-from sklearn.datasets import make_classification
-from sklearn.datasets import make_regression
+from __future__ import print_function, absolute_import, division
+from sklearn.datasets import make_classification, make_regression
 import pandas as pd
 import numpy as np
 import argparse
@@ -37,6 +36,8 @@ def parse_args():
 def load_config(config_name):
     """
     loads a json config file and returns a config dictionary
+
+    :param config_name: the path to the config json
     """
     with open(config_name) as config_file:
         config = json.load(config_file)
@@ -46,6 +47,8 @@ def load_config(config_name):
 def rename_columns(df):
     """
     Rename the columns of a dataframe to have X in front of them
+
+    :param df: data frame we're operating on
     """
     df = df.copy()
     col_names = ["x" + str(i) for i in df.columns]
@@ -65,6 +68,8 @@ def insert_missing_values(df, percent_rows):
     def insert_random_null(x):
         """
         Chose a random column in a df row to null
+
+        :param x: the data frame
         """
         col = random.randint(0, len(x) - 2)  # -2 because last col will always be y
         x[col] = np.nan
@@ -110,6 +115,7 @@ def create_categorical_features(df, n_categorical, label_list):
     """
     Creates random categorical variables
 
+    :param df: data frame we're operation on
     :param n_categorical: The number of categorical variables to create
     :param label_list: A list of lists, each list is the labels for one categorical variable
     :return: A modified dataframe
@@ -134,7 +140,8 @@ def create_categorical_features(df, n_categorical, label_list):
     return df
 
 
-def create_classification_dataset(n_samples, n_features, n_informative, n_redundant, n_repeated, n_clusters_per_class, weights, n_classes):
+def create_classification_dataset(n_samples, n_features, n_informative, n_redundant, n_repeated,
+                                  n_clusters_per_class, weights, n_classes):
     """
 
     Creates a binary classifier dataset
@@ -146,6 +153,7 @@ def create_classification_dataset(n_samples, n_features, n_informative, n_redund
     :param n_repeated:  number of perfect collinear features
     :param n_clusters_per_class:  gaussian clusters per class
     :param weights: list of class balances, e.g. [.5, .5]
+    :param n_classes: the number of class levels
     :return: the requested dataframe
     """
     X, y = make_classification(n_samples=n_samples, n_features=n_features, n_informative=n_informative,
@@ -200,26 +208,24 @@ def make_star_schema(df, out_path="./"):
     :return: dataframe with dimension table
     """
     def get_categorical_columns(df):
-        just_categoricals = df.select_dtypes(include=['category','object'])
+        just_categoricals = df.select_dtypes(include=['category', 'object'])
         return just_categoricals.columns
-    
-    
+
+    # todo: Sara, this is never used. Is there some logic missing?
     def find_dollars(text):
         dollar_match = re.match(r'^\$-?\d+\.?\d+', str(text))
         if dollar_match:
             return 1
         else:
             return 0
-        
-        
+
     def find_percentages(text):
         percent_search = re.search(r'^-?\d+\.?\d+[%]$', str(text))
         if percent_search:
             return 1
         else:
             return 0
-    
-    
+
     def is_special_char(list_object):
         if list_object.dtype != 'O':
             return False
@@ -251,7 +257,7 @@ def make_star_schema(df, out_path="./"):
             vals.reset_index(inplace=True)  # Puts the index numbers in as integers
             
             # Name the column with the same name as the column 'value_count'
-            vals.rename(index=str, columns={'level_0': 'primary_key', 'index':'item',
+            vals.rename(index=str, columns={'level_0': 'primary_key', 'index': 'item',
                                             cat_column: 'value_count'}, inplace=True)
             
             # Make a df out of just the value and the mapping
@@ -286,7 +292,7 @@ def make_star_schema(df, out_path="./"):
     df_cols = df.columns
     df_cols = df_cols.delete(0)
     df_cols = df_cols.insert(0, 'primary_key')
-    df.columns=df_cols
+    df.columns = df_cols
 
     # Return the main dataframe as a 'fact' table, which will then be split into test/train splits
     # dimension tables are immune to this
@@ -298,6 +304,7 @@ def write_dataset(df, file_name, out_path="./"):
     Writes generated dataset to file
     :param df: dataframe to write
     :param file_name: beginning of filename
+    :param out_path: the path to write the dataset
     :return: none
 
     """
@@ -325,20 +332,27 @@ def make_dataset(config=None):
 
     print('-' * 80)
 
-    if config['type'] == 'classification':
+    c_type = config['type']  # avoid multiple lookups
+    if c_type == 'classification':
         print('Creating Classification Dataset...')
 
         df = create_classification_dataset(n_samples=config['n_samples'], n_features=config['n_features'],
-                                   n_informative=config['n_informative'], n_redundant=config['n_redundant'],
-                                   n_repeated=config['n_duplicate'], n_clusters_per_class=config['n_clusters'],
-                                   weights=config['weights'], n_classes=config['n_classes'])
+                                           n_informative=config['n_informative'], n_redundant=config['n_redundant'],
+                                           n_repeated=config['n_duplicate'], n_clusters_per_class=config['n_clusters'],
+                                           weights=config['weights'], n_classes=config['n_classes'])
 
-    elif config['type'] == 'regression':
+    elif c_type == 'regression':
         print('Creating Regression  Dataset...')
 
         df = create_regression_dataset(n_samples=config['n_samples'], n_features=config['n_features'],
                                        n_informative=config['n_informative'], effective_rank=config['effective_rank'],
                                        tail_strength=config['tail_strength'], noise=config['noise'])
+
+    # if it's not in ('regression', 'classification'), df will not have been
+    # assigned yet, and will raise a NameError. We need to handle that case.
+    else:
+        raise ValueError('Config `type` must be one of ("classification", "regression"), but '
+                         'encountered %r' % c_type)
 
     if config['n_categorical'] > 0:
         print("Creating Categorical Features...")
@@ -362,7 +376,8 @@ def make_dataset(config=None):
         if config['n_categorical'] > 0:
             df = make_star_schema(df, config['out_path'])
         else:
-            print("No categorical variables added. Dataset cannot be transformed into a star schema. Dataset will be generated as a single-table dataset...")
+            print("No categorical variables added. Dataset cannot be transformed into a star schema. "
+                  "Dataset will be generated as a single-table dataset...")
 
     print("Writing Train/Test Datasets")
     write_dataset(df, config['output'], config['out_path'])
