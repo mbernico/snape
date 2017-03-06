@@ -92,7 +92,7 @@ def score_multiclass_classification(y, y_hat, report=True):
     report_string = "---Multiclass Classification Score--- \n"
     report_string += classification_report(y, y_hat)
     score = accuracy_score(y, y_hat)
-    report_string += "\nAUC = " + str(score)
+    report_string += "\nAccuracy = " + str(score)
 
     if report:
         print(report_string)

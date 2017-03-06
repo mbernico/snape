@@ -61,9 +61,21 @@ def test_arg_parser():
     assert args['key'] == 'test_key.csv', "parse_args failed to parse it's argument"
 
 
-def setup_file_func():
+def setup_file_classification():
     y = classification_df['y']
     y_hat = classification_df['y_hat']
+    y.to_csv("y_test.csv", header=True, index=False)
+    y_hat.to_csv("y_hat_test.csv", header=False, index=False)
+
+def setup_file_regression():
+    y = regression_df['y']
+    y_hat = regression_df['y_hat']
+    y.to_csv("y_test.csv", header=True, index=False)
+    y_hat.to_csv("y_hat_test.csv", header=False, index=False)
+
+def setup_file_multiclass():
+    y = multiclass_df['y']
+    y_hat = multiclass_df['y_hat']
     y.to_csv("y_test.csv", header=True, index=False)
     y_hat.to_csv("y_hat_test.csv", header=False, index=False)
 
@@ -73,18 +85,27 @@ def teardown_file_func():
     os.remove("y_hat_test.csv")
 
 
-@with_setup(setup=setup_file_func, teardown=teardown_file_func)
+@with_setup(setup=setup_file_classification, teardown=teardown_file_func)
 def test_read_files():
     y, y_hat = read_files("y_test.csv", "y_hat_test.csv")
     assert y.shape[0] > 1, "y should have more than one row"
     assert y_hat.shape[0] > 1, "y hat should have more than one row"
 
 
-@with_setup(setup=setup_file_func, teardown=teardown_file_func)
-def test_score_dataset():
+@with_setup(setup=setup_file_classification, teardown=teardown_file_func)
+def test_score_datasetclassification():
     results = score_dataset(y_file="y_test.csv", y_hat_file="y_hat_test.csv")
     assert_valid_percent(results[0], "Not a valid percent for AUC")
 
 
+@with_setup(setup=setup_file_regression, teardown=teardown_file_func)
+def test_score_dataset_regression():
+    results = score_dataset(y_file="y_test.csv", y_hat_file="y_hat_test.csv")
+    assert results[0] > 0, "MAE probably isn't 0"
 
+
+@with_setup(setup=setup_file_multiclass, teardown=teardown_file_func)
+def test_score_dataset_multiclass():
+    results = score_dataset(y_file="y_test.csv", y_hat_file="y_hat_test.csv")
+    assert_valid_percent(results[0], "Not a valid percent for Accuracy")
 
