@@ -3,8 +3,11 @@ from __future__ import print_function, absolute_import, division
 import pandas as pd
 from snape.make_dataset import *
 from snape.utils import get_random_state
+from nose.tools import assert_raises
 import glob
 import os
+import sys
+
 
 random_state = get_random_state(42)
 
@@ -30,7 +33,7 @@ def test_create_regression_dataset():
 
 def test_create_categorical_features():
     df = pd.DataFrame(random_state.randn(100, 4), columns=list('ABCD'))
-    cat_df = create_categorical_features(df, 2, [['a', 'b'], ['red', 'blue']], random_state=random_state)
+    cat_df = create_categorical_features(df, [['a', 'b'], ['red', 'blue']], random_state=random_state)
     assert cat_df.dtypes.value_counts()['category'] == 2, 'Category levels'  # there should be 2 category variables
 
 
@@ -41,6 +44,9 @@ def test_insert_special_char():
 
     df_spec = insert_special_char("%", df, random_state=random_state)
     assert df_spec['A'].str.contains('$').all()
+
+    # using a non $ or % should raise a value error
+    assert_raises(ValueError, insert_special_char, "!", df, random_state=random_state)
 
 
 def test_insert_missing_values():
@@ -57,7 +63,7 @@ def test_star_schema():
                                        n_repeated=0, n_clusters_per_class=2, weights=[0.5, 0.5], n_classes=2,
                                        random_state=random_state)
 
-    df = create_categorical_features(df, 2, [['a', 'b'], ['red', 'blue']], random_state=random_state)
+    df = create_categorical_features(df, [['a', 'b'], ['red', 'blue']], random_state=random_state)
     df = insert_special_char('$', df, random_state=random_state)
     df = insert_special_char('%', df, random_state=random_state)
     df = insert_missing_values(df, .8, random_state=random_state)
@@ -85,3 +91,16 @@ def test_star_schema():
     # Assert that an index named 'primary_key' was added.
     assert 'primary_key' in fact_df.columns, "Index named pk was not added to the fact table"
     assert len(fact_df.primary_key.value_counts()) == len(fact_df), "Primary key isn't unique."
+
+
+def test_load_json():
+    jf = os.path.join(os.path.dirname(__file__), '../../example/config_classification.json')
+    c = load_config(jf)
+    assert c['type'] == 'classification', "JSON load not sane"
+
+
+def test_arg_parser():
+    args = parse_args(["-ctest.json"])
+    assert args['config'] == 'test.json', "parse_args failed to parse it's argument"
+
+

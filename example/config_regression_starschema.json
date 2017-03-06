@@ -12,7 +12,6 @@
   "pct_missing":0.01,
   "insert_dollar":"Yes",
   "insert_percent":"Yes",
-  "n_categorical":3,
   "star_schema":"Yes",
   "label_list":[["america","asia", "europe"], ["monday", "tuesday", "wednesday", "thursday", "friday"], ["January","Feb","Mar","Apr","May","Jun","July", "Aug", "sept.","Oct","Nov","Dev"]],
   "random_seed":42

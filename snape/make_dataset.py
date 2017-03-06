@@ -10,13 +10,14 @@
 from __future__ import print_function, absolute_import, division
 from sklearn.datasets import make_classification, make_regression
 from sklearn.externals import six
-from .utils import assert_is_type, get_random_state, assert_valid_percent
+from snape.utils import assert_is_type, get_random_state, assert_valid_percent
 import pandas as pd
 import numpy as np
 import argparse
 import json
 import re
 import os
+import sys
 
 try:
     from sklearn.model_selection import train_test_split
@@ -29,21 +30,19 @@ except NameError:  # python 3
     long = int
 
 
-def parse_args():
+def parse_args(args):
     """
     Returns arguments passed at the command line as a dict
     """
     parser = argparse.ArgumentParser(description='Generates a machine Learning Dataset.')
     parser.add_argument('-c', help="Config File Location", required=True,
                         dest='config')
-    args = vars(parser.parse_args())
-    return args
+    return vars(parser.parse_args(args))
 
 
 def load_config(config_name):
     """
     Loads a json config file and returns a config dictionary.
-
     :param config_name: the path to the config json
     """
     with open(config_name) as config_file:
@@ -136,29 +135,24 @@ def insert_special_char(character, df, random_state=None):
     return df
 
 
-def create_categorical_features(df, n_categorical, label_list, random_state=None):
+def create_categorical_features(df, label_list, random_state=None):
     """
     Creates random categorical variables
 
     :param df: data frame we're operation on
-    :param n_categorical: The number of categorical variables to create
     :param label_list: A list of lists, each list is the labels for one categorical variable
     :param random_state: the numpy RandomState
     :return: A modified dataframe
 
     Example:
 
-    create_categorical_features(df, 2, [['a','b'], ['red','blue']])
+    create_categorical_features(df, [['a','b'], ['red','blue']])
 
     """
-    # assert n_categorical is an int, get random state
     random_state = get_random_state(random_state)
-    assert_is_type(n_categorical, (np.int, int, long, np.long))
 
     df = df.copy()
-    if len(label_list) != n_categorical:
-        raise ValueError("You must specify a label for every categorical")
-    # todo: remove `n_categorical` altogether, set it using len(label_list)
+    n_categorical = len(label_list)
 
     # get numeric columns ONCE so we don't have to do it every time we loop:
     numer_cols = [col for col in df.select_dtypes(include=['number']).columns if col != 'y']
@@ -366,7 +360,7 @@ def make_dataset(config=None):
 
     if config is None:
         # called from the command line so parse configuration
-        args = parse_args()
+        args = parse_args(sys.argv[1:])
         config = load_config(args['config'])
 
     print('-' * 80)
@@ -413,15 +407,12 @@ def make_dataset(config=None):
                                        tail_strength=tail_strength, noise=noise, random_state=random_state)
 
     # make sure to use safe lookups to avoid KeyErrors!!!
-    n_categorical = _safe_get_with_default(config, 'n_categorical', -1)
-    if n_categorical > 0:  # default is False-y
+    label_list = _safe_get_with_default(config, 'label_list', None)
+
+    if len(label_list) > 0:  # default is False-y
         print("Creating Categorical Features...")
-        label_list = _safe_get_with_default(config, 'label_list', None)
 
-        if label_list is None:
-            raise ValueError('specified n_categorical without specifying label_list')
-
-        df = create_categorical_features(df, n_categorical, label_list, random_state=random_state)
+        df = create_categorical_features(df, label_list, random_state=random_state)
 
     # insert entropy
     insert_dollar = _safe_get_with_default(config, 'insert_dollar', "No")
