@@ -14,5 +14,6 @@
   "insert_percent":"Yes",
   "n_categorical":3,
   "star_schema":"Yes",
-  "label_list":[["america","asia", "europe"], ["monday", "tuesday", "wednesday", "thursday", "friday"], ["January","Feb","Mar","Apr","May","Jun","July", "Aug", "sept.","Oct","Nov","Dev"]]
+  "label_list":[["america","asia", "europe"], ["monday", "tuesday", "wednesday", "thursday", "friday"], ["January","Feb","Mar","Apr","May","Jun","July", "Aug", "sept.","Oct","Nov","Dev"]],
+  "random_seed":42
 }

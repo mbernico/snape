@@ -1,3 +1,5 @@
+
+from __future__ import absolute_import, print_function
 from snape.make_dataset import make_dataset
 from snape.score_dataset import score_dataset
 
@@ -19,7 +21,8 @@ conf = {
     "insert_percent": "Yes",
     "n_categorical": 0,
     "star_schema": "No",
-    "label_list": []
+    "label_list": [],
+    "random_seed": 42
 }
 
 # make_dataset creates an artificial dataset using the passed dictionary
