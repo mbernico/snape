@@ -21,3 +21,14 @@ def test_valid_percentages():
 
 def test_random_state():
     assert_fails(get_random_state, TypeError, 'some random string')
+
+
+def tests_assert_fails():
+    # meta tests...
+    def _fails_with_assertion_error():
+        def _non_failing_func():
+            return None
+        return assert_fails(_non_failing_func, ValueError)
+
+    # show that it will raise AssertionError if it does not fail with expected Exception
+    assert_fails(_fails_with_assertion_error, AssertionError,)

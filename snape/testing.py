@@ -14,7 +14,10 @@ def assert_fails(fun, err, *args, **kwargs):
     """
     try:
         fun(*args, **kwargs)
-    except err:
+    except err:  # except the EXPECTED error
         return True
-    except Exception:
-        raise
+    except Exception:  # except a DIFFERENT error
+        pass
+
+    # if it gets here, it either raise another exception or didn't fail:
+    raise AssertionError('Expected function to fail with %s' % type(err))
