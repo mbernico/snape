@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from setuptools import setup
 
 setup(name='snape',
-      version='0.1',
+      version='0.2',
       description='Snape Realistic Synthetic Dataset Tool',
       url='https://github.com/mbernico/snape',
       author='Mike Bernico',
