@@ -17,24 +17,21 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
+import sys
 
 
-def parse_args():
+def parse_args(args):
     """
     Returns arguments passed at the command line as a dict
-
     :return: configuration dictionary
 
     """
     parser = argparse.ArgumentParser(description='Scores a ML dataset solution.')
-    # parser.add_argument('-f', '--foo', help='Description for foo argument', required=True)
     parser.add_argument('-p', help="Predictions File", required=True,
                         dest='pred')
     parser.add_argument('-k', help="Key File", required=True,
                         dest='key')
-    args = vars(parser.parse_args())
-    return args
-
+    return vars(parser.parse_args(args))
 
 def read_files(y_file_name, yhat_file_name):
     """
@@ -137,7 +134,7 @@ def score_dataset(y_file=None, y_hat_file=None):
     report_output = True
     if y_file is None and y_hat_file is None:
         # called from the command line so parse configuration
-        args = parse_args()
+        args = parse_args(sys.argv[1:])
         y, y_hat = read_files(args['key'], args['pred'])
     else:
         y, y_hat = read_files(y_file, y_hat_file)
@@ -145,10 +142,11 @@ def score_dataset(y_file=None, y_hat_file=None):
 
     problem_type = guess_problem_type(y)
     print("Problem Type Detection: " + problem_type )
+    print("y shape: " + str(y.shape) + " y hat shape: " + str(y_hat.shape))
     if problem_type == 'binary':
-        results = score_binary_classification(y, y_hat, report=report_output)
+        results = score_binary_classification(y, y_hat[0], report=report_output)
     elif problem_type == 'multiclass':
-        results = score_multiclass_classification(y, y_hat, report=report_output)
+        results = score_multiclass_classification(y, y_hat[0], report=report_output)
     else:
         results = score_regression(y, y_hat)
 

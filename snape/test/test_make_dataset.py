@@ -103,6 +103,7 @@ def test_arg_parser():
     args = parse_args(["-ctest.json"])
     assert args['config'] == 'test.json', "parse_args failed to parse it's argument"
 
+
 def write_dataset_teardown_func():
     os.remove("test_test.csv")
     os.remove("test_testkey.csv")
@@ -114,6 +115,34 @@ def test_write_dataset():
     df = pd.DataFrame(random_state.randn(100, 5), columns=list('ABCDy'))
     write_dataset(df, "test")
 
+
+@with_setup(setup=None, teardown=write_dataset_teardown_func)
+def test_main():
+    # configuration json examples can be found in doc
+    conf = {
+        "type": "classification",
+        "n_classes": 2,
+        "n_samples": 1000,
+        "n_features": 10,
+        "out_path": "./",
+        "output": "test",
+        "n_informative": 3,
+        "n_duplicate": 0,
+        "n_redundant": 0,
+        "n_clusters": 2,
+        "weights": [0.8, 0.2],
+        "pct_missing": 0.00,
+        "insert_dollar": "Yes",
+        "insert_percent": "Yes",
+        "star_schema": "No",
+        "label_list": [],
+        "random_seed": 42
+    }
+
+    # make_dataset creates an artificial dataset using the passed dictionary
+    make_dataset(config=conf)
+
+    assert os.path.isfile("test_train.csv"), "Dataset not created"
 
 
 
