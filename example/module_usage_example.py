@@ -21,7 +21,8 @@ conf = {
     "insert_percent": "Yes",
     "n_categorical": 0,
     "star_schema": "No",
-    "label_list": []
+    "label_list": [],
+    "random_seed": 42
 }
 
 # make_dataset creates an artificial dataset using the passed dictionary
