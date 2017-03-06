@@ -3,7 +3,7 @@ from __future__ import print_function, absolute_import, division
 import pandas as pd
 from snape.make_dataset import *
 from snape.utils import get_random_state
-from nose.tools import assert_raises
+from nose.tools import assert_raises, with_setup
 import glob
 import os
 import sys
@@ -102,5 +102,19 @@ def test_load_json():
 def test_arg_parser():
     args = parse_args(["-ctest.json"])
     assert args['config'] == 'test.json', "parse_args failed to parse it's argument"
+
+def write_dataset_teardown_func():
+    os.remove("test_test.csv")
+    os.remove("test_testkey.csv")
+    os.remove("test_train.csv")
+
+
+@with_setup(setup=None, teardown=write_dataset_teardown_func)
+def test_write_dataset():
+    df = pd.DataFrame(random_state.randn(100, 5), columns=list('ABCDy'))
+    write_dataset(df, "test")
+
+
+
 
 
