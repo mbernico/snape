@@ -69,7 +69,7 @@ def score_binary_classification(y, y_hat, report=True):
     :param report:
     :return:
     """
-    y_hat_class = [1 if x >= 0.5 else 0 for x in y_hat] # convert probability to class for classification report
+    y_hat_class = [1 if x >= 0.5 else 0 for x in y_hat]  # convert probability to class for classification report
 
     report_string = "---Binary Classification Score--- \n"
     report_string += classification_report(y, y_hat_class)
@@ -79,7 +79,7 @@ def score_binary_classification(y, y_hat, report=True):
     if report:
         print(report_string)
 
-    return (score, report_string)
+    return score, report_string
 
 
 def score_multiclass_classification(y, y_hat, report=True):
@@ -97,7 +97,7 @@ def score_multiclass_classification(y, y_hat, report=True):
     if report:
         print(report_string)
 
-    return(score, report_string)
+    return score, report_string
 
 
 def score_regression(y, y_hat, report=True):
@@ -119,7 +119,7 @@ def score_regression(y, y_hat, report=True):
     if report:
         print(report_string)
 
-    return(mae, report_string)
+    return mae, report_string
 
 
 def score_dataset(y_file=None, y_hat_file=None):
@@ -141,7 +141,7 @@ def score_dataset(y_file=None, y_hat_file=None):
         report_output = False
 
     problem_type = guess_problem_type(y)
-    print("Problem Type Detection: " + problem_type )
+    print("Problem Type Detection: " + problem_type)
     print("y shape: " + str(y.shape) + " y hat shape: " + str(y_hat.shape))
     if problem_type == 'binary':
         results = score_binary_classification(y, y_hat[0], report=report_output)
@@ -156,4 +156,3 @@ def score_dataset(y_file=None, y_hat_file=None):
 
 if __name__ == "__main__":
     score_dataset()
-

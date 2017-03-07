@@ -408,8 +408,9 @@ def make_dataset(config=None):
 
     # make sure to use safe lookups to avoid KeyErrors!!!
     label_list = _safe_get_with_default(config, 'label_list', None)
+    do_categorical = label_list is not None and len(label_list) > 0
 
-    if len(label_list) > 0:  # default is False-y
+    if do_categorical:
         print("Creating Categorical Features...")
 
         df = create_categorical_features(df, label_list, random_state=random_state)
@@ -436,7 +437,7 @@ def make_dataset(config=None):
     outpath = _safe_get_with_default(config, 'out_path', "." + os.path.sep)
     if star_schema == "Yes":
         # Check the number of categorical variables
-        if n_categorical > 0:
+        if do_categorical:
             df = make_star_schema(df, outpath)
         else:
             print("No categorical variables added. Dataset cannot be transformed into a star schema. "
