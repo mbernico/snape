@@ -96,6 +96,8 @@ def sample_synset_links(wnid, n, img_dir):
         # repeat until # downloaded = n
         i = len(os.listdir(sub_dir))
 
+        # need to add functionality for exiting if stuck in while loop
+
     #np.random.choice(im_links, n, replace = False)
 
 
