@@ -5,6 +5,7 @@ import requests
 import pandas as pd
 import numpy as np
 from bs4 import BeautifulSoup
+from snape import flicker
 
 
 def get_synset_image_links(wnid):
@@ -24,15 +25,20 @@ def get_synset_image_links(wnid):
 def download_image(image_url, file_out):
 
     img_data = requests.get(image_url).content
-    with open(file_out, 'wb') as handler:
-        handler.write(img_data)
 
-    # check if file is an image
-    file_type = imghdr.what(file_out)
+    if catch_unavailable_img(img_data):
+        pass
 
-    # delete file if something is wrong
-    if file_type is None:
-        os.remove(file_out)
+    else:
+        with open(file_out, 'wb') as handler:
+            handler.write(img_data)
+
+        file_type = imghdr.what(file_out)
+
+        if file_type is None:
+            os.remove(file_out)
+        else:
+            print(image_url)
 
 
 def retrieve_class_counts():
@@ -57,7 +63,7 @@ def get_ilsvrc_1000_synsets():
 
     request = requests.get("http://image-net.org/challenges/LSVRC/2014/browse-synsets")
 
-    soup = BeautifulSoup(request.text)
+    soup = BeautifulSoup(request.text, "html.parser")
 
     html_list = soup.findAll('a')
 
@@ -98,21 +104,17 @@ def sample_synset_links(wnid, n, img_dir):
 
         # need to add functionality for exiting if stuck in while loop
 
-    #np.random.choice(im_links, n, replace = False)
+    # np.random.choice(im_links, n, replace = False)
 
 
-def catch_unavailable_flicker_img():
+def catch_unavailable_img(img_data):
+
+    im1_check = img_data == flicker.junk_image1
+    im2_check = img_data == flicker.junk_image2
+
+    is_it_junk = im1_check or im2_check
+    return is_it_junk
+
+
+def sample_imagenet():
     pass
-
-
-##############################
-
-synsets = get_ilsvrc_1000_synsets()
-
-chosen_synsets = np.random.choice(synsets, 2, replace = False)
-
-for syn in chosen_synsets:
-    print(syn)
-    print('sample:', sample_synset_links(syn, 5, '/Users/home/Desktop/'))
-
-# need to do some EDA on the synset frequency counts
