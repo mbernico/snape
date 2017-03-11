@@ -8,113 +8,96 @@ from bs4 import BeautifulSoup
 from snape import flicker
 
 
-def get_synset_image_links(wnid):
-    """
-    gets images from imagenet for a given synset
-    :return:
-    """
-    url = "http://www.image-net.org/api/text/imagenet.synset.geturls?wnid="
-    url += wnid
+class ImageNet:
 
-    request = requests.get(url)
+    def __init__(self, n_classes):
+        self.ilsvrc_synsets = self.get_ilsvrc_1000_synsets()
+        self.chosen_synsets = np.random.choice(self.ilsvrc_synsets, n_classes, replace=False)
 
-    link_list = request.text.split('\r\n')
-    return link_list
+    def sample_synset_links(self, wnid, n, img_dir):
+        img_links = self.get_synset_image_links(wnid)
+        i = 0
+        sub_dir = img_dir + wnid
+        os.mkdir(sub_dir)
+        while i < n:
+            # pop a random sample
+            pop_ix = np.random.choice(len(img_links), 1)[0]
+            sam = img_links.pop(pop_ix)
+            # try to download it
+            file_name = img_dir + wnid + '/' + str(i) + '.jpg'
+            try:
+                ImageGrabber().download_image(sam, file_name)
+            except:
+                pass
+            # repeat until # downloaded = n
+            i = len(os.listdir(sub_dir))
+            # need to add functionality for exiting if stuck in while loop
 
+    def get_images(self, n_samples, output_dir):
+        for syn in self.chosen_synsets:
+            print(syn)
+            self.sample_synset_links(syn, n_samples, output_dir)
 
-def download_image(image_url, file_out):
+    @staticmethod
+    def get_ilsvrc_1000_synsets():
+        request = requests.get("http://image-net.org/challenges/LSVRC/2014/browse-synsets")
+        soup = BeautifulSoup(request.text, "html.parser")
+        html_list = soup.findAll('a')
+        wnid_list = []
+        for h in html_list:
+            url = h.attrs['href']
+            if 'wnid=' in url:
+                wnid_list.append(url[-9:])
+        return wnid_list
 
-    img_data = requests.get(image_url).content
+    @staticmethod
+    def get_synset_image_links(wnid):
+        """
+        gets images from imagenet for a given synset
+        :return:
+        """
+        url = "http://www.image-net.org/api/text/imagenet.synset.geturls?wnid="
+        url += wnid
+        request = requests.get(url)
+        link_list = request.text.split('\r\n')
+        return link_list
 
-    if catch_unavailable_img(img_data):
-        pass
-
-    else:
-        with open(file_out, 'wb') as handler:
-            handler.write(img_data)
-
-        file_type = imghdr.what(file_out)
-
-        if file_type is None:
-            os.remove(file_out)
-        else:
-            print(image_url)
-
-
-def retrieve_class_counts():
-
-    request = requests.get("http://www.image-net.org/api/xml/ReleaseStatus.xml")
-
-    soup = BeautifulSoup(request.text, "xml")
-
-    row_list = []
-
-    for synset in soup.findAll('synset'):
-        row_list.append(synset.attrs)
-
-    df = pd.DataFrame(row_list)
-    df['numImages'] = pd.to_numeric(df['numImages'])
-
-    # check = df[df['numImages'] > 100]
-    return df
-
-
-def get_ilsvrc_1000_synsets():
-
-    request = requests.get("http://image-net.org/challenges/LSVRC/2014/browse-synsets")
-
-    soup = BeautifulSoup(request.text, "html.parser")
-
-    html_list = soup.findAll('a')
-
-    wnid_list = []
-
-    for h in html_list:
-        url = h.attrs['href']
-        if 'wnid=' in url:
-            wnid_list.append(url[-9:])
-
-    return wnid_list
+    @staticmethod
+    def retrieve_class_counts():
+        request = requests.get("http://www.image-net.org/api/xml/ReleaseStatus.xml")
+        soup = BeautifulSoup(request.text, "xml")
+        row_list = []
+        for synset in soup.findAll('synset'):
+            row_list.append(synset.attrs)
+        df = pd.DataFrame(row_list)
+        df['numImages'] = pd.to_numeric(df['numImages'])
+        return df
 
 
-def sample_synset_links(wnid, n, img_dir):
+class ImageGrabber:
 
-    img_links = get_synset_image_links(wnid)
-    i = 0
-
-    sub_dir = img_dir + wnid
-    os.mkdir(sub_dir)
-
-    while i < n:
-
-        # pop a random sample
-        pop_ix = np.random.choice(len(img_links), 1)[0]
-        sam = img_links.pop(pop_ix)
-
-        # try to download it
-        file_name = img_dir + wnid + '/' + str(i) + '.jpg'
-
-        try:
-            download_image(sam, file_name)
-        except:
+    def download_image(self, image_url, file_out):
+        img_data = requests.get(image_url).content
+        if self.catch_unavailable_img(img_data):
             pass
+        else:
+            with open(file_out, 'wb') as handler:
+                handler.write(img_data)
+            file_type = imghdr.what(file_out)
+            if file_type is None:
+                os.remove(file_out)
+            else:
+                print(image_url)
 
-        # repeat until # downloaded = n
-        i = len(os.listdir(sub_dir))
+    @staticmethod
+    def catch_unavailable_img(img_data):
+        im1_check = img_data == flicker.junk_image1
+        im2_check = img_data == flicker.junk_image2
+        is_it_junk = im1_check or im2_check
+        return is_it_junk
 
-        # need to add functionality for exiting if stuck in while loop
+class OpenImages:
+    pass
 
-    # np.random.choice(im_links, n, replace = False)
-
-
-def catch_unavailable_img(img_data):
-
-    im1_check = img_data == flicker.junk_image1
-    im2_check = img_data == flicker.junk_image2
-
-    is_it_junk = im1_check or im2_check
-    return is_it_junk
-
-
-def sample_imagenet():
+class GoogleSearch:
     pass
