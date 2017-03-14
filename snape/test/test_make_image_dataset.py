@@ -1,12 +1,83 @@
 
 import unittest
-from snape.imagenet_api import *
+import shutil
+from snape.make_image_dataset import *
 
 
-class TestImagenetApi(unittest.TestCase):
+class TestImageNet(unittest.TestCase):
 
-    def get_synset_image_links(self):
-        pass
+    def test_sample_synset_links(self):
+        n = 5
+        wnid = 'n02114855'
+        im_dir = os.getcwd() + '/im_dir/'
+        os.mkdir(im_dir)
+        try:
+            ImageNet(1).sample_synset_links(wnid, n, im_dir)
+            n_images = len(os.listdir(im_dir + '/' + wnid))
+            self.assertEqual(n, n_images, "Did not download n images")
+            self.assertIn(wnid, os.listdir(im_dir), "Did not get the requested synset")
+        except:
+            raise
+        finally:
+            shutil.rmtree(im_dir)
+
+    def test_get_images(self):
+        n = 5
+        im_dir = os.getcwd() + '/im_dir/'
+        os.mkdir(im_dir)
+        try:
+            ImageNet(1).get_images(n, im_dir)
+            sub_dir = im_dir + os.listdir(im_dir)[0]
+            n_images = len(os.listdir(sub_dir))
+            self.assertEqual(n, n_images, "Did not download n images")
+        except:
+            raise
+        finally:
+            shutil.rmtree(im_dir)
+
+    def test_get_ilsvrc_1000_synsets(self):
+        synsets = ImageNet.get_ilsvrc_1000_synsets()
+        self.assertEqual(len(synsets), 1000, "ILSVRC page parsed incorrectly")
+
+    def test_get_synset_image_links(self):
+        wnid = 'n02114855'
+        links = ImageNet.get_synset_image_links(wnid)
+        self.assertGreater(len(links), 0, "Did not return any image links")
+
+    def test_retrieve_class_counts(self):
+        class_counts = ImageNet.retrieve_class_counts()
+        self.assertIsInstance(class_counts, pd.core.frame.DataFrame, "Class counts not returned in a dataframe")
+
+
+class TestImageGrabber(unittest.TestCase):
+
+    def test_download_image(self):
+        good_url = "http://farm4.static.flickr.com/3290/2998414960_01dd35d094.jpg"
+        stale_url = "https://mckinleyleather.com/image/130963084.jpg"
+        im_path = "ducky.jpg"
+        ImageGrabber().download_image(good_url, im_path)
+        image_type = imghdr.what(im_path)
+        os.remove(im_path)
+        self.assertIsNotNone(image_type)
+
+    def test_catch_unavailable_image(self):
+        good_url = "http://farm4.static.flickr.com/3290/2998414960_01dd35d094.jpg"
+        stale_url = "https://mckinleyleather.com/image/130963084.jpg"
+        junk_url = "http://farm4.static.flickr.com/3225/2806850016_9bf939037e.jpg"
+        good_img_data = requests.get(good_url)
+        stale_img_data = requests.get(stale_url)
+        junk_img_data = requests.get(junk_url)
+        self.assertFalse(ImageGrabber.catch_unavailable_image(good_img_data))
+        self.assertTrue(ImageGrabber.catch_unavailable_image(stale_img_data))
+        self.assertTrue(ImageGrabber.catch_unavailable_image(junk_img_data))
+
+
+class TestOpenImages(unittest.TestCase):
+    pass
+
+
+class TestGoogleSearch(unittest.TestCase):
+    pass
 
 
 if __name__ == '__main__':
