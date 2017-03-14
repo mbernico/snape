@@ -20,17 +20,16 @@ class ImageNet:
         sub_dir = img_dir + wnid
         os.mkdir(sub_dir)
         while i < n:
-            # pop a random sample
             pop_ix = np.random.choice(len(img_links), 1)[0]
             sam = img_links.pop(pop_ix)
-            # try to download it
             file_name = img_dir + wnid + '/' + str(i) + '.jpg'
             try:
                 ImageGrabber().download_image(sam, file_name)
             except:
                 pass
-            # repeat until # downloaded = n
             i = len(os.listdir(sub_dir))
+            if len(img_links) == 0:
+                break
             # need to add functionality for exiting if stuck in while loop
 
     def get_images(self, n_samples, output_dir):
@@ -77,12 +76,12 @@ class ImageNet:
 class ImageGrabber:
 
     def download_image(self, image_url, file_out):
-        img_data = requests.get(image_url).content
-        if self.catch_unavailable_img(img_data):
+        img_data = requests.get(image_url)
+        if self.catch_unavailable_image(img_data):
             pass
         else:
             with open(file_out, 'wb') as handler:
-                handler.write(img_data)
+                handler.write(img_data.content)
             file_type = imghdr.what(file_out)
             if file_type is None:
                 os.remove(file_out)
@@ -90,10 +89,11 @@ class ImageGrabber:
                 print(image_url)
 
     @staticmethod
-    def catch_unavailable_img(img_data):
-        im1_check = img_data == flicker.junk_image1
-        im2_check = img_data == flicker.junk_image2
-        is_it_junk = im1_check or im2_check
+    def catch_unavailable_image(img_data):
+        not_an_image = 'image' not in img_data.headers['Content-Type']
+        im1_check = img_data.content == flicker.junk_image1
+        im2_check = img_data.content == flicker.junk_image2
+        is_it_junk = not_an_image or im1_check or im2_check
         return is_it_junk
 
 class OpenImages:
