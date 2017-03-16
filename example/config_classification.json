@@ -13,7 +13,7 @@
   "pct_missing":0.01,
   "insert_dollar":"Yes",
   "insert_percent":"Yes",
-  "n_categorical":3,
   "star_schema":"No",
-  "label_list":[["america","asia", "euorpe"], ["monday", "tuesday", "wednesday", "thurday", "friday"], ["January","Feb","Mar","Apr","May","Jun","July", "Aug", "sept.","Oct","Nov","Dev"]]
+  "label_list":[["america","asia", "euorpe"], ["monday", "tuesday", "wednesday", "thurday", "friday"], ["January","Feb","Mar","Apr","May","Jun","July", "Aug", "sept.","Oct","Nov","Dev"]],
+  "random_seed":42
 }

@@ -2,10 +2,12 @@ sudo: required
 language: python
 
 before_install: source build_tools/travis/before_install.sh
-addons:
-  apt:
-    packages:
-    - gcc
+
+# Snape shouldn't need these...
+# addons:
+#   apt:
+#     packages:
+#     - gcc
 
 env:
   global:
@@ -14,12 +16,10 @@ env:
     - OMP_NUM_THREADS=4
     - OPENBLAS_NUM_THREADS=4
   matrix:
+   - DISTRIB="conda" PYTHON_VERSION="2.7" SCIKIT_LEARN_VERSION="0.17.1" COVERAGE="true"
+   - DISTRIB="conda" PYTHON_VERSION="2.7" SCIKIT_LEARN_VERSION="0.18" COVERAGE="true"
    - DISTRIB="conda" PYTHON_VERSION="3.5" SCIKIT_LEARN_VERSION="0.17.1" COVERAGE="true"
    - DISTRIB="conda" PYTHON_VERSION="3.5" SCIKIT_LEARN_VERSION="0.18" COVERAGE="true"
-
-matrix:
-  allow_failures:
-    - python: 3.5  # do we want to?
 
 install: source build_tools/travis/install.sh
 before_script:
