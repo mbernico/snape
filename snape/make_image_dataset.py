@@ -119,11 +119,11 @@ class _ImageGrabber:
         return is_it_junk
 
 
-class OpenImages:
+class _OpenImages:
     pass
 
 
-class GoogleSearch:
+class _GoogleSearch:
     pass
 
 if __name__ == "__main__":
