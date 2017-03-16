@@ -3,7 +3,6 @@ import imghdr
 import os
 import requests
 import pandas as pd
-import numpy as np
 import sys
 from bs4 import BeautifulSoup
 from snape import flicker
@@ -17,13 +16,18 @@ def make_image_dataset(config=None):
         args = parse_args(sys.argv[1:])
         config = load_config(args['config'])
 
+    random_state = get_random_state(config["random_seed"])
+
     if config["image_source"] == "imagenet":
-        image_net = ImageNet(config["n_classes"])
+        image_net = ImageNet(config["n_classes"], random_state)
         image_net.get_images(config["n_samples"], config["out_path"])
+
     elif config["image_source"] == "openimages":
         print("Not yet supported. The only image_source currently supported is 'imagenet'")
+
     elif config["image_source"] == "googlesearch":
         print("Not yet supported. The only image_source currently supported is 'imagenet'")
+
     else:
         print(config["image_source"], "is not a supported image_source")
         print("The only image_source currently supported is 'imagenet'")
@@ -31,9 +35,10 @@ def make_image_dataset(config=None):
 
 class ImageNet:
 
-    def __init__(self, n_classes):
+    def __init__(self, n_classes, random_state=None):
         self.ilsvrc_synsets = self.get_ilsvrc_1000_synsets()
-        self.chosen_synsets = np.random.choice(self.ilsvrc_synsets, n_classes, replace=False)
+        self.random_state = get_random_state(random_state)
+        self.chosen_synsets = self.random_state.choice(self.ilsvrc_synsets, n_classes, replace=False)
 
     def sample_synset_links(self, wnid, n, img_dir):
         img_links = self.get_synset_image_links(wnid)
@@ -41,7 +46,7 @@ class ImageNet:
         sub_dir = img_dir + wnid
         os.mkdir(sub_dir)
         while i < n:
-            pop_ix = np.random.choice(len(img_links), 1)[0]
+            pop_ix = self.random_state.choice(len(img_links), 1)[0]
             sam = img_links.pop(pop_ix)
             file_name = img_dir + wnid + '/' + str(i) + '.jpg'
             try:
@@ -55,7 +60,6 @@ class ImageNet:
 
     def get_images(self, n_samples, output_dir):
         for syn in self.chosen_synsets:
-
             print(syn)
             self.sample_synset_links(syn, n_samples, output_dir)
 
@@ -73,10 +77,6 @@ class ImageNet:
 
     @staticmethod
     def get_synset_image_links(wnid):
-        """
-        gets images from imagenet for a given synset
-        :return:
-        """
         url = "http://www.image-net.org/api/text/imagenet.synset.geturls?wnid="
         url += wnid
         request = requests.get(url)
