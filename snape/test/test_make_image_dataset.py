@@ -1,10 +1,9 @@
 
-import unittest
 import shutil
 from snape.make_image_dataset import *
 
 
-class TestImageNet(unittest.TestCase):
+class TestImageNet:
 
     def test_sample_synset_links(self):
         n = 5
@@ -49,7 +48,7 @@ class TestImageNet(unittest.TestCase):
         assert isinstance(class_counts, pd.core.frame.DataFrame), "Class counts not returned in a dataframe"
 
 
-class TestImageGrabber(unittest.TestCase):
+class TestImageGrabber:
 
     def test_download_image(self):
         good_url = "http://farm4.static.flickr.com/3290/2998414960_01dd35d094.jpg"
@@ -76,13 +75,10 @@ class TestImageGrabber(unittest.TestCase):
         assert ImageGrabber.catch_unavailable_image(junk_img_data),  "The junk image tested was found to be good"
 
 
-class TestOpenImages(unittest.TestCase):
+class TestOpenImages():
     pass
 
 
-class TestGoogleSearch(unittest.TestCase):
+class TestGoogleSearch():
     pass
 
-
-if __name__ == '__main__':
-    unittest.main()
