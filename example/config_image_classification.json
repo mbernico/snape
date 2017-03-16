@@ -1,0 +1,7 @@
+{
+    "n_classes": 2,
+    "n_samples": 10,
+    "out_path": "./",
+    "image_source": "imagenet",
+    "random_seed":42
+}
