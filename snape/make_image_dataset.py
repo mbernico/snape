@@ -96,8 +96,10 @@ class ImageGrabber:
         is_it_junk = not_an_image or im1_check or im2_check
         return is_it_junk
 
+
 class OpenImages:
     pass
+
 
 class GoogleSearch:
     pass
