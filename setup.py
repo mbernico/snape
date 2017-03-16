@@ -12,6 +12,8 @@ setup(name='snape',
       packages=['snape'],
       install_requires=['sklearn',
                         'pandas',
-                        'numpy'
+                        'numpy',
+                        'requests',
+                        'beautifulsoup4'
                         ],
       zip_safe=False)
