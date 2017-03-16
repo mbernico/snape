@@ -53,12 +53,16 @@ class TestImageGrabber(unittest.TestCase):
 
     def test_download_image(self):
         good_url = "http://farm4.static.flickr.com/3290/2998414960_01dd35d094.jpg"
-        stale_url = "https://mckinleyleather.com/image/130963084.jpg"
-        im_path = "ducky.jpg"
-        ImageGrabber().download_image(good_url, im_path)
-        image_type = imghdr.what(im_path)
-        os.remove(im_path)
-        self.assertIsNotNone(image_type)
+        good_im_path = "ducky.jpg"
+        ImageGrabber().download_image(good_url, good_im_path)
+        good_im_type = imghdr.what(good_im_path)
+        os.remove(good_im_path)
+        self.assertIsNotNone(good_im_type)
+        bad_url = "https://mckinleyleather.com/image/130963084.jpg"
+        bad_im_path = "no_ducky.jpg"
+        ImageGrabber().download_image(bad_url, bad_im_path)
+        is_file = os.path.isfile(bad_im_path)
+        self.assertFalse(is_file)
 
     def test_catch_unavailable_image(self):
         good_url = "http://farm4.static.flickr.com/3290/2998414960_01dd35d094.jpg"
