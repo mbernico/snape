@@ -19,7 +19,7 @@ def make_image_dataset(config=None):
     random_state = get_random_state(config["random_seed"])
 
     if config["image_source"] == "imagenet":
-        image_net = ImageNet(config["n_classes"], random_state)
+        image_net = _ImageNet(config["n_classes"], random_state)
         image_net.get_images(config["n_samples"], config["out_path"])
 
     elif config["image_source"] == "openimages":
@@ -33,7 +33,7 @@ def make_image_dataset(config=None):
         print("The only image_source currently supported is 'imagenet'")
 
 
-class ImageNet:
+class _ImageNet:
 
     def __init__(self, n_classes, random_state=None):
         self.ilsvrc_synsets = self.get_ilsvrc_1000_synsets()
@@ -50,7 +50,7 @@ class ImageNet:
             sam = img_links.pop(pop_ix)
             file_name = img_dir + wnid + '/' + str(i) + '.jpg'
             try:
-                ImageGrabber().download_image(sam, file_name)
+                _ImageGrabber().download_image(sam, file_name)
             except:
                 pass
             i = len(os.listdir(sub_dir))
@@ -95,7 +95,7 @@ class ImageNet:
         return df
 
 
-class ImageGrabber:
+class _ImageGrabber:
 
     def download_image(self, image_url, file_out):
         img_data = requests.get(image_url)
