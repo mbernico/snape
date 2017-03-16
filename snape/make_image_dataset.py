@@ -4,8 +4,29 @@ import os
 import requests
 import pandas as pd
 import numpy as np
+import sys
 from bs4 import BeautifulSoup
 from snape import flicker
+from snape.make_dataset import parse_args, load_config
+from snape.utils import get_random_state
+
+
+def make_image_dataset(config=None):
+    if config is None:
+        # called from the command line so parse configuration
+        args = parse_args(sys.argv[1:])
+        config = load_config(args['config'])
+
+    if config["image_source"] == "imagenet":
+        image_net = ImageNet(config["n_classes"])
+        image_net.get_images(config["n_samples"], config["out_path"])
+    elif config["image_source"] == "openimages":
+        print("Not yet supported. The only image_source currently supported is 'imagenet'")
+    elif config["image_source"] == "googlesearch":
+        print("Not yet supported. The only image_source currently supported is 'imagenet'")
+    else:
+        print(config["image_source"], "is not a supported image_source")
+        print("The only image_source currently supported is 'imagenet'")
 
 
 class ImageNet:
@@ -34,6 +55,7 @@ class ImageNet:
 
     def get_images(self, n_samples, output_dir):
         for syn in self.chosen_synsets:
+
             print(syn)
             self.sample_synset_links(syn, n_samples, output_dir)
 
@@ -103,3 +125,6 @@ class OpenImages:
 
 class GoogleSearch:
     pass
+
+if __name__ == "__main__":
+    make_image_dataset()
