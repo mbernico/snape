@@ -2,6 +2,19 @@
 import shutil
 from snape.make_image_dataset import *
 from snape.make_image_dataset import _ImageNet, _ImageGrabber
+from snape.utils import get_random_state
+import os
+
+conf = {
+        "n_classes": 2,
+        "n_samples": 11,
+        "out_path": "./test_images/",
+        "weights": [.8, .2],
+        "image_source": "imagenet",
+        "random_seed": 42
+    }
+
+random_state = get_random_state(conf["random_seed"])
 
 
 def test_make_image_dataset():
@@ -10,47 +23,51 @@ def test_make_image_dataset():
 
 
 class TestImageNet:
+    def __init__(self):
+        self.image_net = _ImageNet(n_classes=conf["n_classes"],
+                                   weights=conf["weights"],
+                                   n_samples=conf["n_samples"],
+                                   output_dir=conf["out_path"],
+                                   random_state=random_state)
+
+    def test_get_images(self):
+        os.mkdir(conf["out_path"])
+        try:
+            self.image_net.get_images()
+            sub_dir = conf["out_path"] + os.listdir(conf["out_path"])[0]
+            n_images = len(os.listdir(sub_dir))
+            class1_size = int(conf["n_samples"] * conf["weights"][0])
+            assert class1_size == n_images, "Did not download n images"
+        except:
+            raise
+        finally:
+            shutil.rmtree(conf["out_path"])
 
     def test_sample_synset_links(self):
         n = 5
         wnid = 'n02114855'
-        im_dir = os.getcwd() + '/im_dir/'
-        os.mkdir(im_dir)
+        os.mkdir(conf["out_path"])
         try:
-            _ImageNet(1).sample_synset_links(wnid, n, im_dir)
-            n_images = len(os.listdir(im_dir + '/' + wnid))
+            self.image_net.sample_synset_links(wnid, n, conf["out_path"])
+            n_images = len(os.listdir(conf["out_path"] + '/' + wnid))
             assert n == n_images, "Did not download n images"
-            assert wnid in os.listdir(im_dir), "Did not get the requested synset"
+            assert wnid in os.listdir(conf["out_path"]), "Did not get the requested synset"
         except:
             raise
         finally:
-            shutil.rmtree(im_dir)
-
-    def test_get_images(self):
-        n = 5
-        im_dir = os.getcwd() + '/im_dir/'
-        os.mkdir(im_dir)
-        try:
-            _ImageNet(1).get_images(n, im_dir)
-            sub_dir = im_dir + os.listdir(im_dir)[0]
-            n_images = len(os.listdir(sub_dir))
-            assert n == n_images, "Did not download n images"
-        except:
-            raise
-        finally:
-            shutil.rmtree(im_dir)
+            shutil.rmtree(conf["out_path"])
 
     def test_get_ilsvrc_1000_synsets(self):
-        synsets = _ImageNet.get_ilsvrc_1000_synsets()
+        synsets = self.image_net.get_ilsvrc_1000_synsets()
         assert len(synsets) == 1000, "ILSVRC page parsed incorrectly"
 
     def test_get_synset_image_links(self):
         wnid = 'n02114855'
-        links = _ImageNet.get_synset_image_links(wnid)
+        links = self.image_net.get_synset_image_links(wnid)
         assert len(links) > 0, "Did not return any image links"
 
     def test_retrieve_class_counts(self):
-        class_counts = _ImageNet.retrieve_class_counts()
+        class_counts = self.image_net.retrieve_class_counts()
         assert isinstance(class_counts, pd.core.frame.DataFrame), "Class counts not returned in a dataframe"
 
 
