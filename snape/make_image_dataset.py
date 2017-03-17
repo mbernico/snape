@@ -19,8 +19,11 @@ def make_image_dataset(config=None):
     random_state = get_random_state(config["random_seed"])
 
     if config["image_source"] == "imagenet":
-        image_net = _ImageNet(config["n_classes"], random_state)
-        image_net.get_images(config["n_samples"], config["out_path"])
+        _ImageNet(n_classes=config["n_classes"],
+                  weights=config["weights"],
+                  n_samples=config["n_samples"],
+                  output_dir=config["out_path"],
+                  random_state=random_state)
 
     elif config["image_source"] == "openimages":
         print("Not yet supported. The only image_source currently supported is 'imagenet'")
@@ -35,10 +38,20 @@ def make_image_dataset(config=None):
 
 class _ImageNet:
 
-    def __init__(self, n_classes, random_state=None):
+    # todo: prescreen image links for junk
+    # todo: precompute available synsets
+    # todo: return class labels
+    def __init__(self, n_classes, weights, n_samples, output_dir, random_state=None):
         self.ilsvrc_synsets = self.get_ilsvrc_1000_synsets()
         self.random_state = get_random_state(random_state)
         self.chosen_synsets = self.random_state.choice(self.ilsvrc_synsets, n_classes, replace=False)
+        self.get_images(n_samples, output_dir, weights)
+
+    def get_images(self, n_samples, output_dir, weights):
+        for i, syn in enumerate(self.chosen_synsets):
+            print(syn)
+            n = int(n_samples * weights[i])
+            self.sample_synset_links(syn, n, output_dir)
 
     def sample_synset_links(self, wnid, n, img_dir):
         img_links = self.get_synset_image_links(wnid)
@@ -56,12 +69,7 @@ class _ImageNet:
             i = len(os.listdir(sub_dir))
             if len(img_links) == 0:
                 break
-            # need to add functionality for exiting if stuck in while loop
-
-    def get_images(self, n_samples, output_dir):
-        for syn in self.chosen_synsets:
-            print(syn)
-            self.sample_synset_links(syn, n_samples, output_dir)
+            # todo: add more functionality for exiting if stuck in while loop
 
     @staticmethod
     def get_ilsvrc_1000_synsets():
@@ -120,11 +128,15 @@ class _ImageGrabber:
 
 
 class _OpenImages:
+    # todo: build this class for scraping the OpenImages dataset
     pass
 
 
 class _GoogleSearch:
+    # todo: build this class for scraping the google api
     pass
+
+# todo: embed each set of class labels in word vectors & pre-compute similarity matrix
 
 if __name__ == "__main__":
     make_image_dataset()
