@@ -1,3 +1,13 @@
+#############################################################################
+#
+#
+# The snape.make_image_dataset module provides functionality for downloading
+# a unique image dataset. It adapts the same interface as snape.make_dataset,
+# such that a user inputs their desired configuration in either the form of a
+# dictionary -for calling from python, or json -for calling via command line.
+#
+#
+#############################################################################
 
 import imghdr
 import os
@@ -37,7 +47,8 @@ def make_image_dataset(config=None):
 
 
 def check_configuration(conf):
-    expected_conf_args = ["n_classes", "n_samples","out_path","weights","image_source","random_seed"]
+    # todo: check values assigned to each config key
+    expected_conf_args = ["n_classes", "n_samples", "out_path", "weights", "image_source", "random_seed"]
     for key in conf.keys():
         assert key in expected_conf_args, key + " is not an allowed configuration argument"
     for key in expected_conf_args:
