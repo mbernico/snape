@@ -2,6 +2,7 @@
     "n_classes": 2,
     "n_samples": 10,
     "out_path": "./",
+    "weights": [0.8,0.2],
     "image_source": "imagenet",
     "random_seed":42
 }
