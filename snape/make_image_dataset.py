@@ -23,7 +23,7 @@ def make_image_dataset(config=None):
                   weights=config["weights"],
                   n_samples=config["n_samples"],
                   output_dir=config["out_path"],
-                  random_state=random_state)
+                  random_state=random_state).get_images()
 
     elif config["image_source"] == "openimages":
         print("Not yet supported. The only image_source currently supported is 'imagenet'")
@@ -36,6 +36,14 @@ def make_image_dataset(config=None):
         print("The only image_source currently supported is 'imagenet'")
 
 
+def check_configuration(conf):
+    expected_conf_args = ["n_classes", "n_samples","out_path","weights","image_source","random_seed"]
+    for key in conf.keys():
+        assert key in expected_conf_args, key + " is not an allowed configuration argument"
+    for key in expected_conf_args:
+        assert key in conf.keys(), key + " was not specified in the configuration"
+
+
 class _ImageNet:
 
     # todo: prescreen image links for junk
@@ -45,13 +53,15 @@ class _ImageNet:
         self.ilsvrc_synsets = self.get_ilsvrc_1000_synsets()
         self.random_state = get_random_state(random_state)
         self.chosen_synsets = self.random_state.choice(self.ilsvrc_synsets, n_classes, replace=False)
-        self.get_images(n_samples, output_dir, weights)
+        self.n_samples = n_samples
+        self.output_dir = output_dir
+        self.weights = weights
 
-    def get_images(self, n_samples, output_dir, weights):
+    def get_images(self):
         for i, syn in enumerate(self.chosen_synsets):
             print(syn)
-            n = int(n_samples * weights[i])
-            self.sample_synset_links(syn, n, output_dir)
+            n = int(self.n_samples * self.weights[i])
+            self.sample_synset_links(syn, n, self.output_dir)
 
     def sample_synset_links(self, wnid, n, img_dir):
         img_links = self.get_synset_image_links(wnid)
