@@ -67,6 +67,7 @@ class TestImageNet:
         try:
             self.image_net.get_images()
             sub_dir = conf["out_path"] + os.listdir(conf["out_path"])[0]
+            print("there are ", len(os.listdir(conf["out_path"])), " subdirs")
             print('subdir is ', sub_dir)
             n_images = len(os.listdir(sub_dir))
             print('n_images = ', n_images)
