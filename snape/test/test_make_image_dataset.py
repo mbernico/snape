@@ -67,8 +67,11 @@ class TestImageNet:
         try:
             self.image_net.get_images()
             sub_dir = conf["out_path"] + os.listdir(conf["out_path"])[0]
+            print('subdir is ', sub_dir)
             n_images = len(os.listdir(sub_dir))
+            print('n_images = ', n_images)
             class1_size = int(conf["n_samples"] * conf["weights"][0])
+            print('class1_size = ', class1_size)
             assert class1_size == n_images, "Did not download n images"
         except:
             raise
