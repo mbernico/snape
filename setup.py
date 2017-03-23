@@ -14,6 +14,7 @@ setup(name='snape',
                         'pandas',
                         'numpy',
                         'requests',
-                        'beautifulsoup4'
+                        'beautifulsoup4',
+                        'lxml'
                         ],
       zip_safe=False)
