@@ -66,14 +66,12 @@ class TestImageNet:
         os.mkdir(conf["out_path"])
         try:
             self.image_net.get_images()
-            sub_dir = conf["out_path"] + os.listdir(conf["out_path"])[0]
-            print("there are ", len(os.listdir(conf["out_path"])), " subdirs")
-            print('subdir is ', sub_dir)
-            n_images = len(os.listdir(sub_dir))
-            print('n_images = ', n_images)
+            sub_dir1 = conf["out_path"] + os.listdir(conf["out_path"])[0]
+            sub_dir2 = conf["out_path"] + os.listdir(conf["out_path"])[1]
+            n_images1 = len(os.listdir(sub_dir1))
+            n_images2 = len(os.listdir(sub_dir2))
             class1_size = int(conf["n_samples"] * conf["weights"][0])
-            print('class1_size = ', class1_size)
-            assert class1_size == n_images, "Did not download n images"
+            assert (class1_size == n_images1) or (class1_size == n_images2), "Did not download n images"
         except:
             raise
         finally:
