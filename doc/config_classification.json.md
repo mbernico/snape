@@ -4,7 +4,7 @@
 
 **n_classes**: int, (default=2)
 
-		The number of classes (or labels) of the classification problem.   
+		The number of classes (or labels) of the classification problem.
 
 **n_samples**: int, (default=10000)
 
@@ -16,7 +16,7 @@
 
 **out_path**: string, (default=“./“)
 
-		The output system path 
+		The output system path
 
 **output**: string, (default=“my_dataset”)
 
@@ -34,7 +34,7 @@
 
 		The number of multicolinear features
 
-**n_clusters**: int, (default=4) 
+**n_clusters**: int, (default=4)
 
 		The number of gaussian clusters per class
 
@@ -61,3 +61,8 @@
 **label_list**: list of lists, (default=[[“america","asia", "euorpe"], ["monday", "tuesday", "wednesday", "thurday", "friday"], ["January","Feb","Mar","Apr","May","Jun","July", "Aug", "sept.","Oct","Nov","Dev”]])
 
 		A list of lists, each list is the labels for one categorical variable.
+
+**shuffle**:string, (default=”Yes”)
+
+		Shuffle samples and the features.
+
