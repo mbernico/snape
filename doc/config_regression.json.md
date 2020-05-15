@@ -58,7 +58,7 @@
 
 		A list of lists, each list is the labels for one categorical variable.
 
-**shuffle**:string, (default=”Yes”)
+**shuffle**:bool, (default=true)
 
 		Shuffle samples and the features.
 

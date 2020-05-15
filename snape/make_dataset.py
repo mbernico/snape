@@ -391,8 +391,7 @@ def make_dataset(config=None):
     tail_strength = _safe_get_with_default(config, 'tail_strength', 0.5)
     noise = _safe_get_with_default(config, 'noise', 0.)
     seed = _safe_get_with_default(config, 'random_seed', 42)
-    shuffle = _safe_get_with_default(config, 'shuffle', "Yes")
-    shuffle = True if shuffle == "Yes" else False
+    shuffle = _safe_get_with_default(config, 'shuffle', True)
 
     # get the random state
     random_state = get_random_state(seed)

@@ -16,5 +16,5 @@
   "star_schema":"Yes",
   "label_list":[["america","asia", "euorpe"], ["monday", "tuesday", "wednesday", "thurday", "friday"], ["January","Feb","Mar","Apr","May","Jun","July", "Aug", "sept.","Oct","Nov","Dev"]],
   "random_seed":42,
-  "shuffle": "Yes"
+  "shuffle": true
 }
