@@ -17,8 +17,6 @@ install:
 
 before_script:
   - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 5 # give xvfb some time to start by sleeping for 5 seconds
 
 script: make test
 after_success: ./build_tools/travis/after_success.sh
