@@ -5,7 +5,7 @@ set -e
 if [[ "$DISTRIB" == "conda" ]]; then
     # Deactivate the travis-provided virtual environment and setup a
     # conda-based environment instead
-    deactivate
+    deactivate || echo "No active environment"
 
     # Use the miniconda installer for faster download / install of conda
     # itself
@@ -32,11 +32,9 @@ if [[ "$DISTRIB" == "conda" ]]; then
 
     source activate testenv
 
-    pip install scikit-learn
-    pip install pandas
+    make test-dependencies
     pip install coveralls
-    pip install pytest
 
+    # let setup install other required packages
     python setup.py develop;
 fi
-
