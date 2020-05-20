@@ -25,7 +25,7 @@ test-dependencies:
 
 .PHONY: test-unit
 test-unit:
-	$(PYTHON) -m pytest -v --durations=4 --cov-config .coveragerc --cov snape
+	$(PYTHON) -m pytest -v --durations=4 --cov snape
 
 # TODO: add linting
 .PHONY: test
