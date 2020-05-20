@@ -1,18 +1,15 @@
 
-from __future__ import print_function, absolute_import, division
-import pandas as pd
 from snape.make_dataset import *
 from snape.utils import get_random_state
-from nose.tools import assert_raises, with_setup
+
+import pytest
 import glob
 import os
-import sys
 
 
 random_state = get_random_state(42)
 
 
-# move to nosetests instead of unit tests
 def test_create_classification_dataset():
     df = create_classification_dataset(n_samples=100, n_features=10, n_informative=3, n_redundant=0,
                                        n_repeated=0, n_clusters_per_class=2, weights=[0.5, 0.5], n_classes=2,
@@ -32,9 +29,11 @@ def test_create_regression_dataset():
 
 
 def test_create_categorical_features():
+    rs = get_random_state(42)
     df = pd.DataFrame(random_state.randn(100, 4), columns=list('ABCD'))
-    cat_df = create_categorical_features(df, [['a', 'b'], ['red', 'blue']], random_state=random_state)
-    assert cat_df.dtypes.value_counts()['category'] == 2, 'Category levels'  # there should be 2 category variables
+    cat_df = create_categorical_features(df, [['a', 'b'], ['red', 'blue']], random_state=rs)
+    assert (cat_df.dtypes == "category").sum() == 2, \
+        "Actual: %s" % str(cat_df.dtypes.value_counts())
 
 
 def test_insert_special_char():
@@ -46,7 +45,8 @@ def test_insert_special_char():
     assert df_spec['A'].str.contains('$').all()
 
     # using a non $ or % should raise a value error
-    assert_raises(ValueError, insert_special_char, "!", df, random_state=random_state)
+    with pytest.raises(ValueError):
+        insert_special_char("!", df, random_state=random_state)
 
 
 def test_insert_missing_values():
@@ -104,19 +104,24 @@ def test_arg_parser():
     assert args['config'] == 'test.json', "parse_args failed to parse it's argument"
 
 
-def write_dataset_teardown_func():
-    os.remove("test_test.csv")
-    os.remove("test_testkey.csv")
-    os.remove("test_train.csv")
+def with_dataset_teardown(func):
+    def _closure(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        finally:
+            for p in ('test_test.csv', 'test_testkey.csv', 'test_train.csv'):
+                if os.path.exists(p):
+                    os.unlink(p)
+    return _closure
 
 
-@with_setup(setup=None, teardown=write_dataset_teardown_func)
+@with_dataset_teardown
 def test_write_dataset():
     df = pd.DataFrame(random_state.randn(100, 5), columns=list('ABCDy'))
     write_dataset(df, "test")
 
 
-@with_setup(setup=None, teardown=write_dataset_teardown_func)
+@with_dataset_teardown
 def test_main():
     # configuration json examples can be found in doc
     conf = {
@@ -143,7 +148,3 @@ def test_main():
     make_dataset(config=conf)
 
     assert os.path.isfile("test_train.csv"), "Dataset not created"
-
-
-
-

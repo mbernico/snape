@@ -3,16 +3,17 @@ import shutil
 from snape.make_image_dataset import *
 from snape.make_image_dataset import _ImageNet, _ImageGrabber
 from snape.utils import get_random_state
-from nose.tools import assert_raises
+import glob
+import pytest
 
 conf = {
-        "n_classes": 2,
-        "n_samples": 11,
-        "out_path": "./test_images/",
-        "weights": [.8, .2],
-        "image_source": "imagenet",
-        "random_seed": 42
-    }
+    "n_classes": 2,
+    "n_samples": 11,
+    "out_path": "./test_images/",
+    "weights": [.8, .2],
+    "image_source": "imagenet",
+    "random_seed": 42
+}
 
 random_state = get_random_state(conf["random_seed"])
 
@@ -21,37 +22,53 @@ def test_make_image_dataset():
     os.mkdir(conf["out_path"])
     try:
         make_image_dataset(conf)
-        sub_dir = conf["out_path"] + os.listdir(conf["out_path"])[0]
-        print("SUBDIR:", sub_dir)
-        n_images = len(os.listdir(sub_dir))
-        class1_size = int(conf["n_samples"] * conf["weights"][0])
-        assert class1_size == n_images, "Did not download n images"
-        assert len(os.listdir(conf["out_path"])) == conf["n_classes"], "Did not produce the specified # of classes"
-    except:
-        raise
+
+        subdirs = glob.glob(f'{conf["out_path"]}/*')
+        print(f"Subdirs: {subdirs}")
+
+        assert len(subdirs) == conf["n_classes"], \
+            f'Expected {conf["n_classes"]} classes, but got {len(subdirs)}'
+
+        n_samples = conf["n_samples"]
+        weights = conf["weights"]
+        exp_class_counts = sorted([int(w * n_samples) for w in weights])
+
+        # sort subdir names by present images under each
+        subdir_counts = sorted([len(glob.glob(f'{s}/*')) for s in subdirs])
+        assert exp_class_counts == subdir_counts, \
+            f"\nExpected class counts: {exp_class_counts}" \
+            f"\nActual class counts: {subdir_counts}"
+
     finally:
         shutil.rmtree(conf["out_path"])
 
 
-def test_check_configuration():
-    missing_arg_conf = {
-        "n_samples": 11,
-        "out_path": "./test_images/",
-        "weights": [.8, .2],
-        "image_source": "imagenet",
-        "random_seed": 42
-    }
-    assert_raises(AssertionError, check_configuration, missing_arg_conf)
+@pytest.mark.parametrize(
+    'cfg', [
 
-    wrong_arg_conf = {
-        "nclasses": 2,
-        "n_samples": 11,
-        "out_path": "./test_images/",
-        "weights": [.8, .2],
-        "image_source": "imagenet",
-        "random_seed": 42
-    }
-    assert_raises(AssertionError, check_configuration, wrong_arg_conf)
+        # missing an arg
+        {
+            "n_samples": 11,
+            "out_path": "./test_images/",
+            "weights": [.8, .2],
+            "image_source": "imagenet",
+            "random_seed": 42
+        },
+
+        # wrong arg
+        {
+            "nclasses": 2,
+            "n_samples": 11,
+            "out_path": "./test_images/",
+            "weights": [.8, .2],
+            "image_source": "imagenet",
+            "random_seed": 42
+        }
+    ]
+)
+def test_check_configuration(cfg):
+    with pytest.raises(AssertionError):
+        check_configuration(cfg)
 
 
 class TestImageNet:

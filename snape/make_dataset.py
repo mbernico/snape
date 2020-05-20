@@ -7,10 +7,9 @@
 #
 ########################################################################
 
-from __future__ import print_function, absolute_import, division
 from sklearn.datasets import make_classification, make_regression
-from sklearn.externals import six
 from snape.utils import assert_is_type, get_random_state, assert_valid_percent
+
 import pandas as pd
 import numpy as np
 import argparse
@@ -19,15 +18,7 @@ import re
 import os
 import sys
 
-try:
-    from sklearn.model_selection import train_test_split
-except ImportError:
-    from sklearn.cross_validation import train_test_split
-
-try:
-    long
-except NameError:  # python 3
-    long = int
+from sklearn.model_selection import train_test_split
 
 
 def parse_args(args):
@@ -58,7 +49,7 @@ def rename_columns(df, prefix='x'):
     :param prefix: the prefix string
     """
     # the prefix needs to be a string
-    assert_is_type(prefix, six.string_types)  # 2 & 3 compatible
+    assert_is_type(prefix, str)
 
     df = df.copy()
     df.columns = [prefix + str(i) for i in df.columns]
@@ -117,7 +108,7 @@ def insert_special_char(character, df, random_state=None):
     chosen_col = random_state.choice([col for col in df.select_dtypes(include=['number']).columns if col != 'y'])
 
     # assert that character is a string and that it's in ('$', '%')
-    assert_is_type(character, six.string_types)
+    assert_is_type(character, str)
     if character not in ('$', '%'):
         raise ValueError('expected `character` to be in ("$", "%"), but got {0}'.format(character))
 
@@ -135,13 +126,14 @@ def insert_special_char(character, df, random_state=None):
     return df
 
 
-def create_categorical_features(df, label_list, random_state=None):
+def create_categorical_features(df, label_list, random_state=None, label_name='y'):
     """
     Creates random categorical variables
 
     :param df: data frame we're operation on
     :param label_list: A list of lists, each list is the labels for one categorical variable
     :param random_state: the numpy RandomState
+    :param label_name: the column name of rht label, if any. Default is 'y'
     :return: A modified dataframe
 
     Example:
@@ -155,7 +147,7 @@ def create_categorical_features(df, label_list, random_state=None):
     n_categorical = len(label_list)
 
     # get numeric columns ONCE so we don't have to do it every time we loop:
-    numer_cols = [col for col in df.select_dtypes(include=['number']).columns if col != 'y']
+    numer_cols = [col for col in df.select_dtypes(include=['number']).columns if col != label_name]
 
     for i in range(0, n_categorical):
         # we might be out of numerical columns!
