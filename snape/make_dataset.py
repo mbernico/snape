@@ -166,7 +166,8 @@ def create_categorical_features(df, label_list, random_state=None, label_name='y
 
 
 def create_classification_dataset(n_samples, n_features, n_informative, n_redundant, n_repeated,
-                                  n_clusters_per_class, weights, n_classes, random_state=None):
+                                  n_clusters_per_class, weights, n_classes, random_state=None,
+                                  shuffle=True):
     """
     Creates a binary classifier dataset
 
@@ -179,6 +180,7 @@ def create_classification_dataset(n_samples, n_features, n_informative, n_redund
     :param weights: list of class balances, e.g. [.5, .5]
     :param n_classes: the number of class levels
     :param random_state: the numpy RandomState
+    :param shuffle: shuffle the samples and the features.
     :return: the requested dataframe
     """
     random_state = get_random_state(random_state)
@@ -186,7 +188,7 @@ def create_classification_dataset(n_samples, n_features, n_informative, n_redund
                                n_redundant=n_redundant, n_repeated=n_repeated,
                                n_clusters_per_class=n_clusters_per_class, weights=weights,
                                scale=(np.random.rand(n_features) * 10), n_classes=n_classes,
-                               random_state=random_state)
+                               random_state=random_state, shuffle=shuffle)
     # cast to a data frame
     df = pd.DataFrame(X)
     # rename X columns
@@ -197,7 +199,7 @@ def create_classification_dataset(n_samples, n_features, n_informative, n_redund
 
 
 def create_regression_dataset(n_samples, n_features, n_informative, effective_rank, tail_strength,
-                              noise, random_state=None):
+                              noise, random_state=None, shuffle=True):
     """
     Creates a regression dataset
 
@@ -209,12 +211,13 @@ def create_regression_dataset(n_samples, n_features, n_informative, effective_ra
     :param tail_strength: relative importance of the fat noisy tail of the singular values profile
     :param noise: standard deviation of the gaussian noise applied to the output
     :param random_state: the numpy RandomState
+    :param shuffle: shuffle the samples and the features.
     :return: the requested dataframe
     """
     random_state = get_random_state(random_state)
     X, y = make_regression(n_samples=n_samples, n_features=n_features, n_informative=n_informative,
                            n_targets=1, effective_rank=effective_rank, tail_strength=tail_strength,
-                           noise=noise, random_state=random_state)
+                           noise=noise, random_state=random_state, shuffle=shuffle)
 
     # cast to a data frame
     df = pd.DataFrame(X)
@@ -230,7 +233,7 @@ def make_star_schema(df, out_path="." + os.path.sep):
     Converts dataset to star-schema fact and dimension tables. Dimension tables are written out to CSV files,
     and the dataframe passed to the function is converted into a 'fact' table and returned as a dataframe (this
     file is NOT written out at this point because the fact table would be subject to test/train split functions,
-    and dimension tables would not be). 
+    and dimension tables would not be).
 
     :param df: Source dataframe
     :param out_path: path to write the dimension files to
@@ -257,14 +260,14 @@ def make_star_schema(df, out_path="." + os.path.sep):
     # Get the categorical columns
     cols = _get_categorical_columns(df)
     assert len(cols) > 0, "No categorical variables exist in this dataset; star schema cannot be developed."
-    
+
     # Iterate through the categorical columns
     for cat_column in cols:
-        
-        # Determine if the list includes requested entropy or not (NOTE: Decided not to make dimension 
+
+        # Determine if the list includes requested entropy or not (NOTE: Decided not to make dimension
         # tables before this command so dimension keys CAN'T be selected for entropy)
         if not _is_special_char(df[cat_column]):  # previously was "is not True" but not very pythonic
-            
+
             # Turn the value counts into a dataframe
             vals = pd.DataFrame(df[cat_column].value_counts())
 
@@ -272,7 +275,7 @@ def make_star_schema(df, out_path="." + os.path.sep):
             # Reset the index to add index as the key
             vals.reset_index(inplace=True)  # Puts the field names into the dataframe
             vals.reset_index(inplace=True)  # Puts the index numbers in as integers
-            
+
             # Name the column with the same name as the column 'value_count'
             vals.rename(index=str,
                         columns={'level_0': 'primary_key',
@@ -280,7 +283,7 @@ def make_star_schema(df, out_path="." + os.path.sep):
                                  cat_column: 'value_count'
                                  },
                         inplace=True)
-            
+
             # Make a df out of just the value and the mapping
             val_df = vals[['primary_key', 'item']]
 
@@ -295,23 +298,23 @@ def make_star_schema(df, out_path="." + os.path.sep):
             # Write the new dimension table out to CSV
             dim_file_name = cat_column + '_dim.csv'
             val_df.to_csv(out_path + dim_file_name, index=False)
-            
+
             # Set the index up for mapping
             val_df.set_index('item', inplace=True)
-            
+
             # Convert to dict for mapping
             mapper = val_df.to_dict().get('primary_key')
-            
+
             # Fill the NaNs in the dataframe's categorical column to 'Not Specified'
             df[cat_column].cat.add_categories('Not specified', inplace=True)
             df[cat_column].fillna('Not specified', inplace=True)
-            
+
             # Insert new column into the dataframe
             df.insert(df.shape[1], cat_column + '_key', df[cat_column].map(mapper))
 
             # Drop cat column from the dataframe
             df.drop(cat_column, axis=1, inplace=True)
-            
+
     # Now, reset the dataframe's index and rename the index column as 'primary_key'
     df.reset_index(inplace=True)
     df_cols = df.columns
@@ -380,6 +383,7 @@ def make_dataset(config=None):
     tail_strength = _safe_get_with_default(config, 'tail_strength', 0.5)
     noise = _safe_get_with_default(config, 'noise', 0.)
     seed = _safe_get_with_default(config, 'random_seed', 42)
+    shuffle = _safe_get_with_default(config, 'shuffle', True)
 
     # get the random state
     random_state = get_random_state(seed)
@@ -390,13 +394,15 @@ def make_dataset(config=None):
         df = create_classification_dataset(n_samples=n_samples, n_features=n_features,
                                            n_informative=n_informative, n_redundant=n_redundant,
                                            n_repeated=n_repeated, n_clusters_per_class=n_clusters_per_class,
-                                           weights=weights, n_classes=n_classes, random_state=random_state)
+                                           weights=weights, n_classes=n_classes, random_state=random_state,
+                                           shuffle=shuffle)
 
     else:  # elif c_type == 'regression':
         print('Creating Regression Dataset...')
         df = create_regression_dataset(n_samples=n_samples, n_features=n_features,
                                        n_informative=n_informative, effective_rank=effective_rank,
-                                       tail_strength=tail_strength, noise=noise, random_state=random_state)
+                                       tail_strength=tail_strength, noise=noise, random_state=random_state,
+                                       shuffle=shuffle)
 
     # make sure to use safe lookups to avoid KeyErrors!!!
     label_list = _safe_get_with_default(config, 'label_list', None)
@@ -419,11 +425,11 @@ def make_dataset(config=None):
             df = insert_special_char('$', df, random_state=random_state)
         if insert_percent == "Yes":
             df = insert_special_char('%', df, random_state=random_state)
-    
+
     # insert missing values
     pct_missing = _safe_get_with_default(config, 'pct_missing', None)
     df = insert_missing_values(df, pct_missing, random_state=random_state)
-    
+
     # Convert dataset to star schema if requested
     star_schema = _safe_get_with_default(config, 'star_schema', "No")
     outpath = _safe_get_with_default(config, 'out_path', "." + os.path.sep)

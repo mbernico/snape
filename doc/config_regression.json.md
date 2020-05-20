@@ -1,6 +1,6 @@
 **type**: string, (default=regression)
 
-		The type of dataset.  
+		The type of dataset.
 
 **n_samples**: int, (default=10000)
 
@@ -12,7 +12,7 @@
 
 **out_path**: string, (default=“./“)
 
-		The output system path. 
+		The output system path.
 
 **output**: string, (default=“my_dataset”)
 
@@ -57,3 +57,8 @@
 **label_list**: list of lists, (default=[[“america","asia", "euorpe"], ["monday", "tuesday", "wednesday", "thurday", "friday"], ["January","Feb","Mar","Apr","May","Jun","July", "Aug", "sept.","Oct","Nov","Dev”]])
 
 		A list of lists, each list is the labels for one categorical variable.
+
+**shuffle**:bool, (default=true)
+
+		Shuffle samples and the features.
+
