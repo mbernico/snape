@@ -1,22 +1,27 @@
 sudo: required
 language: python
+python:
+  - "3.6"
+  - "3.7"
 
-before_install:
-  - ./build_tools/travis/before_install.sh
-
-env:
-  global:
-    - OMP_NUM_THREADS=4
-    - OPENBLAS_NUM_THREADS=4
-  matrix:
-   - DISTRIB="conda" PYTHON_VERSION="3.6"
-   - DISTRIB="conda" PYTHON_VERSION="3.7"
+addons:
+  apt:
+    packages:
+      - libblas-dev
+      - liblapack-dev
 
 install:
-  - ./build_tools/travis/install.sh
+  - |
+    travis_wait travis_retry pip install scipy numpy
+    make test-dependencies
+    # eventually get rid of this when on codecov:
+    pip install coveralls
+    pip install -e .
 
 script:
-  - conda activate testenv || echo "testenv already active"
   - make test
 
-after_success: ./build_tools/travis/after_success.sh
+after_success:
+  - |
+    # TODO: switch to codecov
+    coveralls || echo "Coveralls upload failed"
