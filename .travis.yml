@@ -15,8 +15,8 @@ env:
 install:
   - ./build_tools/travis/install.sh
 
-before_script:
-  - "export DISPLAY=:99.0"
+script:
+  - conda activate testenv || echo "testenv already active"
+  - make test
 
-script: make test
 after_success: ./build_tools/travis/after_success.sh

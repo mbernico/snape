@@ -30,11 +30,10 @@ if [[ "$DISTRIB" == "conda" ]]; then
     # provided versions
     conda create -n testenv --yes python=$PYTHON_VERSION numpy scipy coverage
 
-    source activate testenv
-
+    conda activate testenv
     make test-dependencies
     pip install coveralls
 
     # let setup install other required packages
-    python setup.py develop;
+    python setup.py develop
 fi
