@@ -16,14 +16,8 @@ if [[ "$DISTRIB" == "conda" ]]; then
     echo "Cached in $HOME/download :"
     ls -l
     echo
-    if [[ ! -f miniconda.sh ]]
-        then
-        if [[ "$PYTHON_VERSION" == "2.7" ]]; then
-            wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
-        fi
-        if [[ "$PYTHON_VERSION" == "3.5" ]]; then
-            wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-        fi
+    if [[ ! -f miniconda.sh ]]; then
+      wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
     fi
     chmod +x miniconda.sh && bash miniconda.sh -b -p $HOME/miniconda
     export PATH="$HOME/miniconda/bin:$PATH"
@@ -37,16 +31,12 @@ if [[ "$DISTRIB" == "conda" ]]; then
     conda create -n testenv --yes python=$PYTHON_VERSION numpy scipy coverage
 
     source activate testenv
-    if [[ "$PYTHON_VERSION" == "2.7" ]]; then
-      conda install --yes -c dan_blanchard python-coveralls nose-cov;
-    fi
 
-    pip install scikit-learn==$SCIKIT_LEARN_VERSION
+    pip install scikit-learn
     pip install pandas
     pip install coveralls
-
-    # Install nose-timer via pip
-    pip install nose-timer
+    pip install pytest
 
     python setup.py develop;
 fi
+

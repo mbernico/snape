@@ -1,5 +1,4 @@
 
-from __future__ import absolute_import
 from setuptools import setup
 
 setup(name='snape',
@@ -10,7 +9,7 @@ setup(name='snape',
       author_email='mike.bernico@gmail.com',
       license='Apache 2.0',
       packages=['snape'],
-      install_requires=['sklearn',
+      install_requires=['sklearn>=0.18',
                         'pandas',
                         'numpy',
                         'requests',
@@ -18,3 +17,4 @@ setup(name='snape',
                         'lxml'
                         ],
       zip_safe=False)
+
