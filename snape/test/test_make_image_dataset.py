@@ -3,7 +3,7 @@ import shutil
 from snape.make_image_dataset import *
 from snape.make_image_dataset import _ImageNet, _ImageGrabber
 from snape.utils import get_random_state
-from nose.tools import assert_raises
+import pytest
 
 conf = {
         "n_classes": 2,
@@ -33,25 +33,32 @@ def test_make_image_dataset():
         shutil.rmtree(conf["out_path"])
 
 
-def test_check_configuration():
-    missing_arg_conf = {
-        "n_samples": 11,
-        "out_path": "./test_images/",
-        "weights": [.8, .2],
-        "image_source": "imagenet",
-        "random_seed": 42
-    }
-    assert_raises(AssertionError, check_configuration, missing_arg_conf)
+@pytest.mark.parametrize(
+    'cfg', [
 
-    wrong_arg_conf = {
-        "nclasses": 2,
-        "n_samples": 11,
-        "out_path": "./test_images/",
-        "weights": [.8, .2],
-        "image_source": "imagenet",
-        "random_seed": 42
-    }
-    assert_raises(AssertionError, check_configuration, wrong_arg_conf)
+        # missing an arg
+        {
+            "n_samples": 11,
+            "out_path": "./test_images/",
+            "weights": [.8, .2],
+            "image_source": "imagenet",
+            "random_seed": 42
+        },
+
+        # wrong arg
+        {
+            "nclasses": 2,
+            "n_samples": 11,
+            "out_path": "./test_images/",
+            "weights": [.8, .2],
+            "image_source": "imagenet",
+            "random_seed": 42
+        }
+    ]
+)
+def test_check_configuration(cfg):
+    with pytest.raises(AssertionError):
+        check_configuration(cfg)
 
 
 class TestImageNet:

@@ -1,12 +1,8 @@
 
-from __future__ import print_function, absolute_import, division
-import pandas as pd
-import numpy as np
 from numpy.testing import assert_almost_equal
 from snape.score_dataset import *
 from snape.utils import get_random_state, assert_valid_percent
 import os
-from nose.tools import with_setup
 
 random_state = get_random_state(42)
 y_rand = (random_state.rand(200))
@@ -67,11 +63,13 @@ def setup_file_classification():
     y.to_csv("y_test.csv", header=True, index=False)
     y_hat.to_csv("y_hat_test.csv", header=False, index=False)
 
+
 def setup_file_regression():
     y = regression_df['y']
     y_hat = regression_df['y_hat']
     y.to_csv("y_test.csv", header=True, index=False)
     y_hat.to_csv("y_hat_test.csv", header=False, index=False)
+
 
 def setup_file_multiclass():
     y = multiclass_df['y']
@@ -83,6 +81,19 @@ def setup_file_multiclass():
 def teardown_file_func():
     os.remove("y_test.csv")
     os.remove("y_hat_test.csv")
+
+
+def with_setup(setup, teardown):
+    """Nose is deprecated, so this is a lightweight decorator that does the same thing"""
+    def _decorator(func):
+        def _test_wrapper(*args, **kwargs):
+            setup()
+            try:
+                return func(*args, **kwargs)
+            finally:
+                teardown()
+        return _test_wrapper
+    return _decorator
 
 
 @with_setup(setup=setup_file_classification, teardown=teardown_file_func)
@@ -108,4 +119,3 @@ def test_score_dataset_regression():
 def test_score_dataset_multiclass():
     results = score_dataset(y_file="y_test.csv", y_hat_file="y_hat_test.csv")
     assert_valid_percent(results[0], "Not a valid percent for Accuracy")
-

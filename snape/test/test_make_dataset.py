@@ -10,7 +10,6 @@ import os
 random_state = get_random_state(42)
 
 
-# move to nosetests instead of unit tests
 def test_create_classification_dataset():
     df = create_classification_dataset(n_samples=100, n_features=10, n_informative=3, n_redundant=0,
                                        n_repeated=0, n_clusters_per_class=2, weights=[0.5, 0.5], n_classes=2,
