@@ -21,7 +21,7 @@ sdist:
 
 .PHONY: test-dependencies
 test-dependencies:
-	$(PYTHON) -m pip install coverage pytest flake8
+	$(PYTHON) -m pip install coverage pytest pytest-cov flake8
 
 .PHONY: test-unit
 test-unit:
@@ -30,4 +30,3 @@ test-unit:
 # TODO: add linting
 .PHONY: test
 test: test-unit
-

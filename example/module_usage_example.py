@@ -1,5 +1,4 @@
 
-from __future__ import absolute_import, print_function
 from snape.make_dataset import make_dataset
 from snape.score_dataset import score_dataset
 
