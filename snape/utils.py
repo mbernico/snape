@@ -1,13 +1,6 @@
 
-from __future__ import absolute_import, division, print_function
 from numpy.random import RandomState
 import numpy as np
-
-try:
-    from types import NoneType
-except ImportError:  # indicates it's python 3
-    NoneType = type(None)  # NoneType is not around in Python 3
-    long = int  # there's no long in python 3
 
 __all__ = [
     'assert_is_type',
@@ -24,7 +17,7 @@ def assert_is_type(x, t):
 
 def assert_valid_percent(x, eq_lower=False, eq_upper=False):
     # these are all castable to float
-    assert_is_type(x, (float, np.float, np.int, int, long, np.long))
+    assert_is_type(x, (float, np.float, np.int, int, np.long))
     x = float(x)
 
     # test lower bound:
@@ -39,7 +32,8 @@ def assert_valid_percent(x, eq_lower=False, eq_upper=False):
 
 def get_random_state(random_state):
     # if it's a seed, return a new seeded RandomState
-    if isinstance(random_state, (int, np.int, long, np.long, NoneType)):
+    if random_state is None or \
+            isinstance(random_state, (int, np.int, np.long)):
         return RandomState(random_state)
     # if it's a RandomState, it's been initialized
     elif isinstance(random_state, RandomState):
