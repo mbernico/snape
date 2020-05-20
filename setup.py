@@ -10,11 +10,10 @@ setup(name='snape',
       license='Apache 2.0',
       packages=['snape'],
       install_requires=['sklearn>=0.18',
-                        'pandas',
+                        'pandas<1.0.0',
                         'numpy',
                         'requests',
                         'beautifulsoup4',
                         'lxml'
                         ],
       zip_safe=False)
-
