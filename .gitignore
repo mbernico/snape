@@ -8,3 +8,4 @@ dist/
 .pytest_cache
 .coverage
 .coverage.*
+test_images/

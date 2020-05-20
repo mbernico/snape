@@ -2,7 +2,7 @@
 from setuptools import setup
 
 setup(name='snape',
-      version='0.2',
+      version='0.2',  # TODO: this needs to be controlled w a tag
       description='Snape Realistic Synthetic Dataset Tool',
       url='https://github.com/mbernico/snape',
       author='Mike Bernico',
